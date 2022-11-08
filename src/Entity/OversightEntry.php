@@ -14,7 +14,7 @@ class OversightEntry {
     #[ORM\Column()]
     protected int $id;
 
-    #[ORM\Column()]
+    #[ORM\Column(name: 'oversightId')]
     protected int $oversightId;
 
     #[ORM\Column()]

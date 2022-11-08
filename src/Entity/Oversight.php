@@ -15,7 +15,7 @@ class Oversight {
     #[ORM\Column()]
     protected int $id;
 
-    #[ORM\Column()]
+    #[ORM\Column(name: 'accountId')]
     protected int $accountId;
 
     #[ORM\Column()]

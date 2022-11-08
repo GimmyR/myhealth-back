@@ -14,10 +14,10 @@ class EntryDetail {
     #[ORM\Column()]
     protected int $id;
 
-    #[ORM\Column()]
+    #[ORM\Column(name: 'entryId')]
     protected int $entryId;
 
-    #[ORM\Column()]
+    #[ORM\Column(name: 'parameterId')]
     protected int $parameterId;
 
     #[ORM\Column()]
