@@ -42,8 +42,8 @@ class OversightController extends AbstractController {
 
             $model['oversight'] = $this->getOversight($oversightId, $oversightRep);
             $model['parameters'] = $this->getParameters($oversightId, $parameterRep);
-            $entryDetails = $this->getEntryDetails($oversightId, $oversightEntryRep, $entryDetailRep);
-            $model['entryDetails'] = $this->sortEntryDetailsByParameter($entryDetails, $model['parameters']);
+            $model['entryDetails'] = $this->getEntryDetails($oversightId, $oversightEntryRep, $entryDetailRep);
+            $model['entryDetailsByParameter'] = $this->sortEntryDetailsByParameter($model['entryDetails'], $model['parameters']);
             $model['status'] = 0;
 
         } catch(ControllerException $e1) {
