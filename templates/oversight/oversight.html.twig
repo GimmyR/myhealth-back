@@ -5,5 +5,17 @@
 {% endblock %}
 
 {% block body %}
-	{{ dump(oversight) }}
+
+	{% if status < 0 %}
+		{{ dump(message) }}
+	{% endif %}
+
+	{% if oversight is defined %}
+		{{ dump(oversight) }}
+	{% endif %}
+
+	{% if parameters is defined %}
+		{{ dump(parameters) }}
+	{% endif %}
+
 {% endblock %}
