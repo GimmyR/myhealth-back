@@ -4,7 +4,7 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity(repositoryClass: EntryDetailRepository::class)]
+#[ORM\Entity()]
 class EntryDetail {
 
     // ATTRIBUTES :

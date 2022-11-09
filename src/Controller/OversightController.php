@@ -3,6 +3,8 @@
 namespace App\Controller;
 
 use App\Entity\Oversight;
+use App\Repository\EntryDetailRepository;
+use App\Repository\OversightEntryRepository;
 use App\Repository\OversightRepository;
 use App\Repository\ParameterRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -12,16 +14,24 @@ use Symfony\Component\Routing\Annotation\Route;
 class OversightController extends AbstractController {
 
     #[Route('/oversight/{oversightId}', name: 'oversight_show')]
-    public function show(int $oversightId, OversightRepository $oversightRep, ParameterRepository $parameterRep): Response {
+    public function show(int $oversightId, 
+                            OversightRepository $oversightRep, 
+                                ParameterRepository $parameterRep,
+                                    OversightEntryRepository $oversightEntryRep, 
+                                        EntryDetailRepository $entryDetailRep): Response {
 
         return $this->render(
             'oversight/oversight.html.twig', 
-            $this->getModel($oversightId, $oversightRep, $parameterRep)
+            $this->getModel($oversightId, $oversightRep, $parameterRep, $oversightEntryRep, $entryDetailRep)
         );
 
     }
 
-    protected function getModel(int $oversightId, OversightRepository $oversightRep, ParameterRepository $parameterRep) {
+    protected function getModel(int $oversightId, 
+                                    OversightRepository $oversightRep, 
+                                        ParameterRepository $parameterRep,
+                                            OversightEntryRepository $oversightEntryRep, 
+                                                EntryDetailRepository $entryDetailRep) {
 
         $model = [ 
             'status' => -1,
@@ -32,6 +42,7 @@ class OversightController extends AbstractController {
 
             $model['oversight'] = $this->getOversight($oversightId, $oversightRep);
             $model['parameters'] = $this->getParameters($oversightId, $parameterRep);
+            $model['entryDetails'] = $this->getEntryDetails($oversightId, $oversightEntryRep, $entryDetailRep);
             $model['status'] = 0;
 
         } catch(ControllerException $e1) {
@@ -65,6 +76,19 @@ class OversightController extends AbstractController {
             throw new ControllerException("Parameters not found !");
         else
             return $parameters;
+
+    }
+
+    protected function getEntryDetails(int $oversightId, OversightEntryRepository $oversightEntryRep, EntryDetailRepository $entryDetailRep): array {
+
+        $oversightEntries = $oversightEntryRep->findAllByOversightId($oversightId);
+
+        $entryDetails = [];
+
+        if(!$entryDetails)
+            throw new ControllerException("Entry Details not found !");
+        else
+            return $entryDetails;
 
     }
 
