@@ -14,6 +14,29 @@ class EntryDetailRepository extends ServiceEntityRepository {
         
     }
 
+    public function findAllByEntryId(int $entryId) {
+
+        $connection = $this->getEntityManager()->getConnection();
+
+        $sql = 
+            'SELECT DATE_FORMAT(oe.date, "%d %b %y") as date, ed.*
+            FROM EntryDetail ed
+            JOIN Parameter p
+            ON p.id = ed.parameterId
+            JOIN OversightEntry oe
+            ON oe.id = ed.entryId
+            WHERE ed.entryId = :entryId
+            AND ed.status = 1
+            AND p.status = 1
+            ORDER BY ed.parameterId ASC';
+
+        $statement = $connection->prepare($sql);
+        $resultSet = $statement->executeQuery([ 'entryId' => $entryId ]);
+
+        return $resultSet->fetchAllAssociative();
+
+    }
+
 }
 
 ?>

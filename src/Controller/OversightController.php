@@ -42,7 +42,8 @@ class OversightController extends AbstractController {
 
             $model['oversight'] = $this->getOversight($oversightId, $oversightRep);
             $model['parameters'] = $this->getParameters($oversightId, $parameterRep);
-            $model['entryDetails'] = $this->getEntryDetails($oversightId, $oversightEntryRep, $entryDetailRep);
+            $entryDetails = $this->getEntryDetails($oversightId, $oversightEntryRep, $entryDetailRep);
+            $model['entryDetails'] = $this->sortEntryDetailsByParameter($entryDetails, $model['parameters']);
             $model['status'] = 0;
 
         } catch(ControllerException $e1) {
@@ -84,11 +85,37 @@ class OversightController extends AbstractController {
         $oversightEntries = $oversightEntryRep->findAllByOversightId($oversightId);
 
         $entryDetails = [];
+        
+        foreach($oversightEntries as $entry)
+            $entryDetails[] = $entryDetailRep->findAllByEntryId($entry->getId());
 
         if(!$entryDetails)
             throw new ControllerException("Entry Details not found !");
         else
             return $entryDetails;
+
+    }
+
+    protected function sortEntryDetailsByParameter(array $entryDetails, array $parameters): array {
+
+        $result = [];
+
+        foreach($parameters as $parameter) {
+
+            foreach($entryDetails as $entry) {
+
+                foreach($entry as $table) {
+
+                    if($table['parameterId'] == $parameter->getId()) {
+                        $result[$parameter->getId()][] = $table;
+                        break;
+                    }
+
+                }
+
+            }
+
+        } return $result;
 
     }
 
