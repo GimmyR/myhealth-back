@@ -4,7 +4,6 @@ namespace App\Controller;
 
 use App\Entity\Oversight;
 use App\Repository\EntryDetailRepository;
-use App\Repository\OversightEntryRepository;
 use App\Repository\OversightRepository;
 use App\Repository\ParameterRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -17,33 +16,31 @@ class OversightController extends AbstractController {
     public function show(int $oversightId, 
                             OversightRepository $oversightRep, 
                                 ParameterRepository $parameterRep,
-                                    OversightEntryRepository $oversightEntryRep, 
-                                        EntryDetailRepository $entryDetailRep): Response {
-
-        return $this->render(
-            'oversight/oversight.html.twig', 
-            $this->getModel($oversightId, $oversightRep, $parameterRep, $oversightEntryRep, $entryDetailRep)
-        );
-
-    }
-
-    protected function getModel(int $oversightId, 
-                                    OversightRepository $oversightRep, 
-                                        ParameterRepository $parameterRep,
-                                            OversightEntryRepository $oversightEntryRep, 
-                                                EntryDetailRepository $entryDetailRep) {
+                                    EntryDetailRepository $entryDetailRep): Response {
 
         $model = [ 
             'status' => -1,
             'message' => 'Unknown Error ! Call an administrator !'
         ];
+        
+        return $this->render(
+            'oversight/oversight.html.twig', 
+            $this->getModel($model, $oversightId, $oversightRep, $parameterRep, $entryDetailRep)
+        );
+
+    }
+
+    protected function getModel(array $model, int $oversightId, 
+                                    OversightRepository $oversightRep, 
+                                        ParameterRepository $parameterRep,
+                                            EntryDetailRepository $entryDetailRep) {
 
         try {
 
             $model['oversight'] = $this->getOversight($oversightId, $oversightRep);
             $model['parameters'] = $this->getParameters($oversightId, $parameterRep);
-            $model['entryDetails'] = $this->getEntryDetails($oversightId, $oversightEntryRep, $entryDetailRep);
-            $model['entryDetailsByParameter'] = $this->sortEntryDetailsByParameter($model['entryDetails'], $model['parameters']);
+            $entryDetails = $this->getEntryDetails($oversightId, $model['parameters'], $entryDetailRep);
+            $model['chartDatas'] = $this->getChartDatas($model['parameters'], $entryDetails);
             $model['status'] = 0;
 
         } catch(ControllerException $e1) {
@@ -80,14 +77,12 @@ class OversightController extends AbstractController {
 
     }
 
-    protected function getEntryDetails(int $oversightId, OversightEntryRepository $oversightEntryRep, EntryDetailRepository $entryDetailRep): array {
-
-        $oversightEntries = $oversightEntryRep->findAllByOversightId($oversightId);
+    protected function getEntryDetails(int $oversightId, array $parameters, EntryDetailRepository $entryDetailRep): array {
 
         $entryDetails = [];
         
-        foreach($oversightEntries as $entry)
-            $entryDetails[] = $entryDetailRep->findAllByEntryId($entry->getId());
+        foreach($parameters as $parameter) 
+            $entryDetails[$parameter->getName()] = $entryDetailRep->findAllByParameterId($parameter->getId());
 
         if(!$entryDetails)
             throw new ControllerException("Entry Details not found !");
@@ -96,26 +91,19 @@ class OversightController extends AbstractController {
 
     }
 
-    protected function sortEntryDetailsByParameter(array $entryDetails, array $parameters): array {
+    protected function getChartDatas(array $parameters, array $entryDetails): array {
 
-        $result = [];
+        $chartDatas = [];
 
         foreach($parameters as $parameter) {
 
-            foreach($entryDetails as $entry) {
+            foreach($entryDetails[$parameter->getName()] as $entry) {
 
-                foreach($entry as $table) {
-
-                    if($table['parameterId'] == $parameter->getId()) {
-                        $result[$parameter->getId()][] = $table;
-                        break;
-                    }
-
-                }
+                
 
             }
 
-        } return $result;
+        } return $entryDetails;
 
     }
 

@@ -14,7 +14,7 @@ class EntryDetailRepository extends ServiceEntityRepository {
         
     }
 
-    public function findAllByEntryId(int $entryId) {
+    public function findAllByParameterId(int $parameterId) {
 
         $connection = $this->getEntityManager()->getConnection();
 
@@ -25,13 +25,15 @@ class EntryDetailRepository extends ServiceEntityRepository {
             ON p.id = ed.parameterId
             JOIN OversightEntry oe
             ON oe.id = ed.entryId
-            WHERE ed.entryId = :entryId
+            WHERE ed.parameterId = :parameterId
             AND ed.status = 1
-            AND p.status = 1
-            ORDER BY ed.parameterId ASC';
+            AND oe.status = 1
+            ORDER BY oe.date ASC';
 
         $statement = $connection->prepare($sql);
-        $resultSet = $statement->executeQuery([ 'entryId' => $entryId ]);
+        $resultSet = $statement->executeQuery([ 
+            'parameterId' => $parameterId
+        ]);
 
         return $resultSet->fetchAllAssociative();
 
