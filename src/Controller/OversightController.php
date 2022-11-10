@@ -38,9 +38,9 @@ class OversightController extends AbstractController {
         try {
 
             $model['oversight'] = $this->getOversight($oversightId, $oversightRep);
-            $model['parameters'] = $this->getParameters($oversightId, $parameterRep);
-            $entryDetails = $this->getEntryDetails($oversightId, $model['parameters'], $entryDetailRep);
-            $model['chartDatas'] = $this->getChartDatas($model['parameters'], $entryDetails);
+            $parameters = $this->getParameters($oversightId, $parameterRep);
+            $entryDetails = $this->getEntryDetails($oversightId, $parameters, $entryDetailRep);
+            $model['chartDatas'] = $this->getChartDatas($parameters, $entryDetails);
             $model['status'] = 0;
 
         } catch(ControllerException $e1) {
@@ -97,13 +97,23 @@ class OversightController extends AbstractController {
 
         foreach($parameters as $parameter) {
 
+            $labels = [];
+            $data = [];
+
             foreach($entryDetails[$parameter->getName()] as $entry) {
 
-                
+                $labels[] = $entry['date'];
+                $data[] = $entry['value'];
 
-            }
+            } $chartDatas[] = [
+                'labels' => $labels,
+                'datasets' => [[
+                    'label' => $parameter->getName(),
+                    'data' => $data
+                ]]
+            ];
 
-        } return $entryDetails;
+        } return $chartDatas;
 
     }
 
