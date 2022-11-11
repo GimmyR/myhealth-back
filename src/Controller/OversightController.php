@@ -109,7 +109,10 @@ class OversightController extends AbstractController {
                 'labels' => $labels,
                 'datasets' => [[
                     'label' => $parameter->getName(),
-                    'data' => $data
+                    'data' => $data,
+                    'fill' => false,
+                    'borderColor' => 'rgb(79, 55, 216)',
+                    'tension' => 0.1
                 ]]
             ];
 

@@ -4,18 +4,48 @@
 	Oversight
 {% endblock %}
 
+{% block stylesheets %}
+	{{ parent() }}
+{% endblock %}
+
 {% block body %}
 
-	{% if status < 0 %}
-		{{ dump(message) }}
-	{% endif %}
+	<div class="container">
+		{% if status < 0 %}
+			{{ dump(message) }}
+		{% endif %}
 
-	{% if oversight is defined %}
-		{{ dump(oversight) }}
-	{% endif %}
+		{% if oversight is defined %}
+			<div class="row pt-5">
+				<h1 class="mx-auto">{{ oversight.title }}</h1>
+			</div>
+		{% endif %}
+
+		{% if chartDatas is defined %}
+			{% for key, value in chartDatas %}
+				<div class="row pt-5">
+					<canvas id="chart-{{ key }}" class="col-md-8 offset-md-2 my-chart"></canvas>
+				</div>
+			{% endfor %}
+		{% endif %}
+	</div>
+
+{% endblock %}
+
+{% block javascripts %}
+
+	{{ parent() }}
+
+	<script src="{{ asset('js/chart.min.js') }}"></script>
 
 	{% if chartDatas is defined %}
-		{{ dump(chartDatas) }}
+		<script>
+			{% for key, value in chartDatas %}
+				const chart{{ key }} = new Chart(document.getElementById('chart-{{ key }}'), {
+				type: 'line',
+				data: {{ value | json_encode() | raw }}
+			});{% endfor %}
+		</script>
 	{% endif %}
 
 {% endblock %}
