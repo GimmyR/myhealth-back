@@ -16,17 +16,21 @@ class ParameterRepository extends ServiceEntityRepository {
 
     public function findAllByOversightId(int $oversightId) {
 
-        $entityManager = $this->getEntityManager();
+        $connection = $this->getEntityManager()->getConnection();
 
-        $query = $entityManager->createQuery(
-            'SELECT p
-            FROM App\Entity\Parameter p
+        $sql = 
+            'SELECT p.*
+            FROM Parameter p
             WHERE p.oversightId = :oversightId
             AND p.status = 1
-            ORDER BY p.id ASC'
-        )->setParameter('oversightId', $oversightId);
+            ORDER BY p.id ASC';
 
-        return $query->getResult();
+        $statement = $connection->prepare($sql);
+        $resultSet = $statement->executeQuery(
+            [
+                'oversightId' => $oversightId
+            ]
+        ); return $resultSet->fetchAllAssociative();
 
     }
 

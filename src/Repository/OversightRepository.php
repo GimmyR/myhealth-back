@@ -16,18 +16,24 @@ class OversightRepository extends ServiceEntityRepository {
 
     public function findById(int $id) {
 
-        $entityManager = $this->getEntityManager();
+        $connection = $this->getEntityManager()->getConnection();
 
-        $query = $entityManager->createQuery(
-            'SELECT o
-            FROM App\Entity\Oversight o
-            WHERE o.id = :id AND o.status = 1'
-        )->setParameter('id', $id);
+        $sql = 
+            "SELECT o.* 
+            FROM Oversight o 
+            WHERE o.id = :id
+            AND o.status = 1";
 
-        $result = $query->getResult();
+        $statement = $connection->prepare($sql);
+        $resultSet = $statement->executeQuery(
+            [
+                'id' => $id
+            ]
+        );
+        $result = $resultSet->fetchAssociative();
 
-        if(count($result) == 1)
-            return $result[0];
+        if($result != false)
+            return $result;
         else
             return null;
 

@@ -23,10 +23,35 @@
 
 		{% if chartDatas is defined %}
 			{% for key, value in chartDatas %}
-				<div class="row pt-5">
+				<div class="row py-5">
 					<canvas id="chart-{{ key }}" class="col-md-8 offset-md-2 my-chart"></canvas>
 				</div>
 			{% endfor %}
+		{% endif %}
+
+		{% if (entryDetails is defined) and (parameters is defined) %}
+			<div class="col-md-10 offset-md-1 mt-5">
+				<table class="table">
+					<thead>
+						<tr>
+							<th scope="col">Date</th>
+							{% for parameter in parameters %}
+								<th scope="col">{{ parameter.name }}</th>
+							{% endfor %}
+						</tr>
+					</thead>
+					<tbody>
+						{% for entry in entryDetails %}
+							<tr>
+								<td>{{entry.date}}</td>
+								{% for data in entry.data %}
+									<td>{{data.value}}</td>
+								{% endfor %}
+							</tr>
+						{% endfor %}
+					</tbody>
+				</table>
+			</div>
 		{% endif %}
 	</div>
 

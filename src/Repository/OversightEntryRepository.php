@@ -16,17 +16,21 @@ class OversightEntryRepository extends ServiceEntityRepository {
 
     public function findAllByOversightId(int $oversightId) {
 
-        $entityManager = $this->getEntityManager();
+        $connection = $this->getEntityManager()->getConnection();
 
-        $query = $entityManager->createQuery(
-            'SELECT o
-            FROM App\Entity\OversightEntry o
-            WHERE o.oversightId = :oversightId
-            AND o.status = 1
-            ORDER BY o.date ASC'
-        )->setParameter('oversightId', $oversightId);
+        $sql = 
+            'SELECT oe.*
+            FROM OversightEntry oe
+            WHERE oe.oversightId = :oversightId
+            AND oe.status = 1'
+        ;
 
-        return $query->getResult();
+        $statement = $connection->prepare($sql);
+        $resultSet = $statement->executeQuery(
+            [
+                'oversightId' => $oversightId
+            ]
+        ); return $resultSet->fetchAllAssociative();
 
     }
 

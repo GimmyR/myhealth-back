@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Oversight;
 use App\Repository\EntryDetailRepository;
+use App\Repository\OversightEntryRepository;
 use App\Repository\OversightRepository;
 use App\Repository\ParameterRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -16,7 +17,8 @@ class OversightController extends AbstractController {
     public function show(int $oversightId, 
                             OversightRepository $oversightRep, 
                                 ParameterRepository $parameterRep,
-                                    EntryDetailRepository $entryDetailRep): Response {
+                                    OversightEntryRepository $entryRep,
+                                        EntryDetailRepository $entryDetailRep): Response {
 
         $model = [ 
             'status' => -1,
@@ -25,7 +27,7 @@ class OversightController extends AbstractController {
         
         return $this->render(
             'oversight/oversight.html.twig', 
-            $this->getModel($model, $oversightId, $oversightRep, $parameterRep, $entryDetailRep)
+            $this->getModel($model, $oversightId, $oversightRep, $parameterRep, $entryRep, $entryDetailRep)
         );
 
     }
@@ -33,14 +35,17 @@ class OversightController extends AbstractController {
     protected function getModel(array $model, int $oversightId, 
                                     OversightRepository $oversightRep, 
                                         ParameterRepository $parameterRep,
-                                            EntryDetailRepository $entryDetailRep) {
+                                            OversightEntryRepository $entryRep,
+                                                EntryDetailRepository $entryDetailRep) {
 
         try {
 
             $model['oversight'] = $this->getOversight($oversightId, $oversightRep);
-            $parameters = $this->getParameters($oversightId, $parameterRep);
-            $entryDetails = $this->getEntryDetails($oversightId, $parameters, $entryDetailRep);
-            $model['chartDatas'] = $this->getChartDatas($parameters, $entryDetails);
+            $model['parameters'] = $this->getParameters($oversightId, $parameterRep);
+            $entryDetails = $this->getEntryDetailsByParameters($oversightId, $model['parameters'], $entryDetailRep);
+            $model['chartDatas'] = $this->getChartDatas($model['parameters'], $entryDetails);
+            $entries = $this->getOversightEntries($oversightId, $entryRep);
+            $model['entryDetails'] = $this->getEntryDetailsByEntries($oversightId, $entries, $entryDetailRep);
             $model['status'] = 0;
 
         } catch(ControllerException $e1) {
@@ -55,7 +60,7 @@ class OversightController extends AbstractController {
 
     }
 
-    protected function getOversight(int $oversightId, OversightRepository $oversightRep): Oversight {
+    protected function getOversight(int $oversightId, OversightRepository $oversightRep) {
 
         $oversight = $oversightRep->findById($oversightId);
 
@@ -66,7 +71,7 @@ class OversightController extends AbstractController {
 
     }
 
-    protected function getParameters(int $oversightId, ParameterRepository $parameterRep): array {
+    protected function getParameters(int $oversightId, ParameterRepository $parameterRep) {
 
         $parameters = $parameterRep->findAllByOversightId($oversightId);
 
@@ -77,12 +82,40 @@ class OversightController extends AbstractController {
 
     }
 
-    protected function getEntryDetails(int $oversightId, array $parameters, EntryDetailRepository $entryDetailRep): array {
+    protected function getEntryDetailsByParameters(int $oversightId, array $parameters, EntryDetailRepository $entryDetailRep): array {
 
         $entryDetails = [];
         
         foreach($parameters as $parameter) 
-            $entryDetails[$parameter->getName()] = $entryDetailRep->findAllByParameterId($parameter->getId());
+            $entryDetails[$parameter['name']] = $entryDetailRep->findAllByParameterId($parameter['id']);
+
+        if(!$entryDetails)
+            throw new ControllerException("Entry Details not found !");
+        else
+            return $entryDetails;
+
+    }
+
+    protected function getOversightEntries(int $oversightId, OversightEntryRepository $entryRep) {
+
+        $entries = $entryRep->findAllByOversightId($oversightId);
+
+        if(!$entries)
+            throw new ControllerException("Parameters not found !");
+        else
+            return $entries;
+
+    }
+
+    protected function getEntryDetailsByEntries(int $oversightId, $entries, EntryDetailRepository $entryDetailRep): array {
+
+        $entryDetails = [];
+        
+        foreach($entries as $entry) 
+            $entryDetails[] = [
+                'date' => $entry['date'],
+                'data' => $entryDetailRep->findAllByEntryId($entry['id'])
+            ];
 
         if(!$entryDetails)
             throw new ControllerException("Entry Details not found !");
@@ -100,7 +133,7 @@ class OversightController extends AbstractController {
             $labels = [];
             $data = [];
 
-            foreach($entryDetails[$parameter->getName()] as $entry) {
+            foreach($entryDetails[$parameter['name']] as $entry) {
 
                 $labels[] = $entry['date'];
                 $data[] = $entry['value'];
@@ -108,7 +141,7 @@ class OversightController extends AbstractController {
             } $chartDatas[] = [
                 'labels' => $labels,
                 'datasets' => [[
-                    'label' => $parameter->getName(),
+                    'label' => $parameter['name'],
                     'data' => $data,
                     'fill' => false,
                     'borderColor' => 'rgb(79, 55, 216)',

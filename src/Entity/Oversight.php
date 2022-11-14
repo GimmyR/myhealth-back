@@ -2,7 +2,7 @@
 
 namespace App\Entity;
 
-use DateTimeImmutable;
+use App\Repository\OversightRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity()]
