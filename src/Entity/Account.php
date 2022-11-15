@@ -5,6 +5,8 @@ namespace App\Entity;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity()]
+#[ORM\Table(name: 'Account')] // Il faut preciser 'Account' avec un majuscule ici
+                             // car ca cree un conflit au sein de la base de donnees
 class Account {
 
     // ATTRIBUTES :
