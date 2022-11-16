@@ -14,21 +14,26 @@ class AccountRepository extends ServiceEntityRepository {
 
     }
 
-    public function checkAccount(string $email, string $password) {
+    public function checkAccount($email, $password) {
 
-        $entityManager = $this->getEntityManager();
+        $result = false; if($email != null && $password != null) {
+        
+            $entityManager = $this->getEntityManager();
+            $query = $entityManager->createQuery(
 
-        $query = $entityManager->createQuery(
-            'SELECT a
-            FROM App\Entity\Account a
-            WHERE a.email = :email
-            AND a.password = :password'
-        )->setParameters([
+                'SELECT a
+                FROM App\Entity\Account a
+                WHERE a.email = :email
+                AND a.password = :password'
 
-            'email' => $email,
-            'password' => $password
+            )->setParameters([
 
-        ]); return $query->getResult();
+                'email' => $email,
+                'password' => $password
+
+            ]); $result = $query->getResult();
+
+        } return $result;
 
     }
 

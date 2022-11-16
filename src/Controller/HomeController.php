@@ -14,20 +14,29 @@ class HomeController extends AbstractController {
     public function index(RequestStack $requestStack, AccountRepository $accountRep) : Response {
 
         $session = $requestStack->getSession();
-
         $account = $session->get('account');
+        $twigPage = 'home/home.html.twig';
 
         if(!$account)
-            return $this->redirectToRoute('sign_in');
-        else
-            return $this->render('home/home.html.twig', []);
+            $twigPage = 'home/sign-in.html.twig';
+
+        return $this->render($twigPage, []);
 
     }
 
-    #[Route('/sign-in', name: 'sign_in')]
-    public function signIn(): Response {
+    #[Route('/sign-in', name: 'home_sign_in')]
+    public function signIn(RequestStack $requestStack, AccountRepository $accountRep): Response {
 
-        return $this->render('home/sign-in.html.twig', []);
+        $email = $requestStack->getCurrentRequest()->request->get('email');
+        $password = $requestStack->getCurrentRequest()->request->get('password');
+        $account = $accountRep->checkAccount($email, $password);
+        
+        if($account) {
+
+            $session = $requestStack->getSession();
+            $session->set('account', $account);
+
+        } return $this->redirectToRoute('home_index');
 
     }
 
