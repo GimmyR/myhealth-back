@@ -15,12 +15,15 @@ class HomeController extends AbstractController {
 
         $session = $requestStack->getSession();
         $account = $session->get('account');
-        $twigPage = 'home/home.html.twig';
+        $twigPage = 'home/sign-in.html.twig';
+        $models = [];
 
-        if(!$account)
-            $twigPage = 'home/sign-in.html.twig';
-
-        return $this->render($twigPage, []);
+        if($account != false) {
+            $twigPage = 'home/home.html.twig';
+            $models = [
+                'account' => $account
+            ];
+        } return $this->render($twigPage, $models);
 
     }
 
@@ -34,9 +37,19 @@ class HomeController extends AbstractController {
         if($account) {
 
             $session = $requestStack->getSession();
-            $session->set('account', $account);
+            $session->set('account', $account[0]);
 
-        } return $this->redirectToRoute('home_index');
+        } return $this->redirectToRoute('home_index', []);
+
+    }
+
+    #[Route('/sign-out', name: 'home_sign_out')]
+    public function signOut(RequestStack $requestStack): Response {
+
+        $session = $requestStack->getSession();
+        $session->remove('account');
+
+        return $this->redirectToRoute('home_index');
 
     }
 

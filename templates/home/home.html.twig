@@ -1,1 +1,7 @@
-<h1>Hello Gimmy !</h1>
+{% if account is defined %}
+    <h1>Salut, {{account.firstname}} {{account.lastname}} !</h1>
+{% else %}
+    <h1>Salut, euh... Qui es-tu ?!</h1>
+{% endif %}
+
+<a href="/sign-out">Se déconnecter</a>
