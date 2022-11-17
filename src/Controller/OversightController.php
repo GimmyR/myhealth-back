@@ -2,12 +2,13 @@
 
 namespace App\Controller;
 
-use App\Entity\Oversight;
 use App\Repository\EntryDetailRepository;
 use App\Repository\OversightEntryRepository;
 use App\Repository\OversightRepository;
 use App\Repository\ParameterRepository;
+use App\Repository\RepositoryException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -15,42 +16,60 @@ class OversightController extends AbstractController {
 
     #[Route('/oversight/{oversightId}', name: 'oversight_show')]
     public function show(int $oversightId, 
-                            OversightRepository $oversightRep, 
-                                ParameterRepository $parameterRep,
-                                    OversightEntryRepository $entryRep,
-                                        EntryDetailRepository $entryDetailRep): Response {
+                            RequestStack $requestStack,
+                                OversightRepository $oversightRep, 
+                                    ParameterRepository $parameterRep,
+                                        OversightEntryRepository $entryRep,
+                                            EntryDetailRepository $entryDetailRep): Response {
 
         $model = [ 
             'status' => -1,
-            'message' => 'Unknown Error ! Call an administrator !'
+            'message' => 'Problème inconnu ! Appelez un administrateur !'
         ];
-        
-        return $this->render(
-            'oversight/oversight.html.twig', 
-            $this->getModel($model, $oversightId, $oversightRep, $parameterRep, $entryRep, $entryDetailRep)
-        );
+
+        $session = $requestStack->getSession();
+        $account = $session->get('account');
+
+        if($account == false)
+            return $this->redirectToRoute('home_index');
+        else {
+            return $this->render(
+                'oversight/oversight.html.twig', 
+                $this->getModel(
+                    $model, 
+                    $account->getId(),
+                    $oversightId, 
+                    $oversightRep, 
+                    $parameterRep, 
+                    $entryRep, 
+                    $entryDetailRep
+                )
+            );
+        }
 
     }
 
-    protected function getModel(array $model, int $oversightId, 
-                                    OversightRepository $oversightRep, 
-                                        ParameterRepository $parameterRep,
-                                            OversightEntryRepository $entryRep,
-                                                EntryDetailRepository $entryDetailRep) {
+    protected function getModel(array $model, 
+                                    int $accountId,
+                                        int $oversightId, 
+                                            OversightRepository $oversightRep, 
+                                                ParameterRepository $parameterRep,
+                                                    OversightEntryRepository $entryRep,
+                                                        EntryDetailRepository $entryDetailRep) {
 
         try {
 
-            $model['oversight'] = $this->getOversight($oversightId, $oversightRep);
+            $model['oversight'] = $oversightRep->findByIdAndAccountId($oversightId, $accountId);
             $model['parameters'] = $this->getParameters($oversightId, $parameterRep);
-            $entryDetails = $this->getEntryDetailsByParameters($oversightId, $model['parameters'], $entryDetailRep);
+            $entryDetails = $this->getEntryDetailsByParameters($model['parameters'], $entryDetailRep);
             $model['chartDatas'] = $this->getChartDatas($model['parameters'], $entryDetails);
             $entries = $this->getOversightEntries($oversightId, $entryRep);
             $model['entryDetails'] = $this->getEntryDetailsByEntries($oversightId, $entries, $entryDetailRep);
             $model['status'] = 0;
 
-        } catch(ControllerException $e1) {
+        } catch(ControllerException | RepositoryException $e) {
 
-            $model['message'] = $e1->message;
+            $model['message'] = $e->getMessage();
 
         } finally {
 
@@ -60,29 +79,18 @@ class OversightController extends AbstractController {
 
     }
 
-    protected function getOversight(int $oversightId, OversightRepository $oversightRep) {
-
-        $oversight = $oversightRep->findById($oversightId);
-
-        if(!$oversight)
-            throw new ControllerException("Oversight not found !");
-        else
-            return $oversight;
-
-    }
-
     protected function getParameters(int $oversightId, ParameterRepository $parameterRep) {
 
         $parameters = $parameterRep->findAllByOversightId($oversightId);
 
         if(!$parameters)
-            throw new ControllerException("Parameters not found !");
+            throw new ControllerException("Aucun paramètre n'est associé à cette surveillance !");
         else
             return $parameters;
 
     }
 
-    protected function getEntryDetailsByParameters(int $oversightId, array $parameters, EntryDetailRepository $entryDetailRep): array {
+    protected function getEntryDetailsByParameters(array $parameters, EntryDetailRepository $entryDetailRep): array {
 
         $entryDetails = [];
         
@@ -90,7 +98,7 @@ class OversightController extends AbstractController {
             $entryDetails[$parameter['name']] = $entryDetailRep->findAllByParameterId($parameter['id']);
 
         if(!$entryDetails)
-            throw new ControllerException("Entry Details not found !");
+            throw new ControllerException("Détails introuvables (1) !");
         else
             return $entryDetails;
 
@@ -101,7 +109,7 @@ class OversightController extends AbstractController {
         $entries = $entryRep->findAllByOversightId($oversightId);
 
         if(!$entries)
-            throw new ControllerException("Parameters not found !");
+            throw new ControllerException("Entrées introuvables !");
         else
             return $entries;
 
@@ -118,7 +126,7 @@ class OversightController extends AbstractController {
             ];
 
         if(!$entryDetails)
-            throw new ControllerException("Entry Details not found !");
+            throw new ControllerException("Détails introuvables (2) !");
         else
             return $entryDetails;
 

@@ -13,49 +13,51 @@
 	<div class="container">
 		{% if status < 0 %}
 			{{ dump(message) }}
-		{% endif %}
+		{% else %}
 
-		{% if oversight is defined %}
-			<div class="row pt-5">
-				<h1 class="mx-auto">{{ oversight.title }}</h1>
-			</div>
-		{% endif %}
-
-		{% if chartDatas is defined %}
-			{% for key, value in chartDatas %}
-				<div class="row py-5">
-					<canvas id="chart-{{ key }}" class="col-md-8 offset-md-2 my-chart"></canvas>
+			{% if oversight is defined %}
+				<div class="row pt-5 text-center">
+					<h1>{{ oversight.title }}</h1>
 				</div>
-			{% endfor %}
-		{% endif %}
+			{% endif %}
 
-		<div class="row">
-			<button class="btn btn-primary col-md-2 offset-md-5">Ajouter une donnée</button>
-		</div>
+			{% if chartDatas is defined %}
+				{% for key, value in chartDatas %}
+					<div class="col-md-10 offset-md-1 py-4">
+						<canvas id="chart-{{ key }}" class="my-chart"></canvas>
+					</div>
+				{% endfor %}
+			{% endif %}
 
-		{% if (entryDetails is defined) and (parameters is defined) %}
-			<div class="col-md-10 offset-md-1 mt-5">
-				<table class="table">
-					<thead>
-						<tr>
-							<th scope="col">Date</th>
-							{% for parameter in parameters %}
-								<th scope="col">{{ parameter.name }}</th>
-							{% endfor %}
-						</tr>
-					</thead>
-					<tbody>
-						{% for entry in entryDetails %}
+			<div class="row mt-4">
+				<button class="btn btn-primary col-md-2 offset-md-5">Ajouter une donnée</button>
+			</div>
+
+			{% if (entryDetails is defined) and (parameters is defined) %}
+				<div class="col-md-10 offset-md-1 mt-5">
+					<table class="table">
+						<thead>
 							<tr>
-								<td>{{entry.date}}</td>
-								{% for data in entry.data %}
-									<td>{{data.value}}</td>
+								<th scope="col">Date</th>
+								{% for parameter in parameters %}
+									<th scope="col">{{ parameter.name }}</th>
 								{% endfor %}
 							</tr>
-						{% endfor %}
-					</tbody>
-				</table>
-			</div>
+						</thead>
+						<tbody>
+							{% for entry in entryDetails %}
+								<tr>
+									<td>{{entry.date}}</td>
+									{% for data in entry.data %}
+										<td>{{data.value}}</td>
+									{% endfor %}
+								</tr>
+							{% endfor %}
+						</tbody>
+					</table>
+				</div>
+			{% endif %}
+
 		{% endif %}
 	</div>
 

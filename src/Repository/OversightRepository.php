@@ -14,28 +14,26 @@ class OversightRepository extends ServiceEntityRepository {
         
     }
 
-    public function findById(int $id) {
+    public function findByIdAndAccountId(int $id, int $accountId) {
 
-        $connection = $this->getEntityManager()->getConnection();
+        $entityManager = $this->getEntityManager();
 
-        $sql = 
-            "SELECT o.* 
-            FROM Oversight o 
+        $query = $entityManager->createQuery(
+            'SELECT o
+            FROM App\Entity\Oversight o
             WHERE o.id = :id
-            AND o.status = 1";
-
-        $statement = $connection->prepare($sql);
-        $resultSet = $statement->executeQuery(
+            AND o.accountId = :accountId'
+        )->setParameters(
             [
-                'id' => $id
+                'id' => $id,
+                'accountId' => $accountId
             ]
-        );
-        $result = $resultSet->fetchAssociative();
+        ); $result = $query->getResult();
 
-        if($result != false)
-            return $result;
+        if(count($result) == 1)
+            return $result[0];
         else
-            return null;
+            throw new RepositoryException("Vous n'êtes pas associé pas à cette surveillance !");
 
     }
 

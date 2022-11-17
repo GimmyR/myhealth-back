@@ -6,6 +6,7 @@ use App\Repository\OversightRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity()]
+#[ORM\Table(name: 'Oversight')]
 class Oversight {
 
     // ATTRIBUTES :

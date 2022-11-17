@@ -11,16 +11,21 @@ use Symfony\Component\Routing\Annotation\Route;
 class HomeController extends AbstractController {
 
     #[Route('/', name: 'home_index')]
-    public function index(RequestStack $requestStack, AccountRepository $accountRep) : Response {
+    public function index(RequestStack $requestStack) : Response {
 
         $session = $requestStack->getSession();
         $account = $session->get('account');
         $twigPage = 'home/sign-in.html.twig';
-        $models = [];
+        $models = [
+            'status' => -1,
+            'message' => 'Vous n\'êtes pas connecté !'
+        ];
 
         if($account != false) {
             $twigPage = 'home/home.html.twig';
             $models = [
+                'status' => 0,
+                'message' => null,
                 'account' => $account
             ];
         } return $this->render($twigPage, $models);
