@@ -32,7 +32,7 @@
 			{% endif %}
 
 			<div class="row mt-4">
-				<a href="/add-oversight-entry/{{ oversight.id }}" class="btn btn-primary col-md-2 offset-md-5">Ajouter une donnée</a>
+				<a href="/oversight-entry/{{ oversight.id }}" class="btn btn-primary col-md-2 offset-md-5">Ajouter une donnée</a>
 			</div>
 
 			{% if (entryDetails is defined) and (parameters is defined) %}
@@ -42,7 +42,12 @@
 							<tr>
 								<th scope="col">Date</th>
 								{% for parameter in parameters %}
-									<th scope="col">{{ parameter.name }}</th>
+									<th scope="col">
+										{{ parameter.name }}
+										{% if parameter.unit != null %}
+											 ({{ parameter.unit }})
+										{% endif %}
+									</th>
 								{% endfor %}
 							</tr>
 						</thead>

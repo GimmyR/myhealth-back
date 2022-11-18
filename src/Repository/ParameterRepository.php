@@ -30,7 +30,12 @@ class ParameterRepository extends ServiceEntityRepository {
             [
                 'oversightId' => $oversightId
             ]
-        ); return $resultSet->fetchAllAssociative();
+        ); $result = (array)$resultSet->fetchAllAssociative();
+
+        if(count($result) == 0)
+            throw new RepositoryException('Aucun paramètre n\'a été trouvé !');
+        else
+            return $result;
 
     }
 
