@@ -1,7 +1,21 @@
-{% if account is defined %}
-    <h1>Salut, {{account.firstname}} {{account.lastname}} !</h1>
-{% else %}
-    <h1>Salut, euh... Qui es-tu ?!</h1>
-{% endif %}
+{% extends "base.html.twig" %}
 
-<a href="/sign-out">Se déconnecter</a>
+{% block title %}
+    {% if account is defined %}
+        Bienvenue, {{account.firstname}}
+    {% else %}
+        Bienvenue, euh... Qui êtes-vous ?!
+    {% endif %}
+{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+{% endblock %}
+
+{% block body %}
+    {% include "header/header.html.twig" %}
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+{% endblock %}

@@ -10,7 +10,9 @@
 
 {% block body %}
 
-	<div class="container">
+	{% include "header/header.html.twig" %}
+
+	<div class="container pt-5">
 		{% if status < 0 %}
 			{{ dump(message) }}
 		{% else %}
