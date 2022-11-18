@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Repository\AccountRepository;
+use App\Repository\OversightRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
@@ -11,7 +12,7 @@ use Symfony\Component\Routing\Annotation\Route;
 class HomeController extends AbstractController {
 
     #[Route('/', name: 'home_index')]
-    public function index(RequestStack $requestStack) : Response {
+    public function index(RequestStack $requestStack, OversightRepository $oversightRep) : Response {
 
         $session = $requestStack->getSession();
         $account = $session->get('account');
@@ -22,11 +23,13 @@ class HomeController extends AbstractController {
         ];
 
         if($account != false) {
+            $oversights = $oversightRep->findAllByAccountId($account->getId());
             $twigPage = 'home/home.html.twig';
             $models = [
                 'status' => 0,
                 'message' => null,
-                'account' => $account
+                'account' => $account,
+                'oversights' => $oversights
             ];
         } return $this->render($twigPage, $models);
 

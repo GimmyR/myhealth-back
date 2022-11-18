@@ -37,6 +37,20 @@ class OversightRepository extends ServiceEntityRepository {
 
     }
 
+    public function findAllByAccountId(int $accountId) {
+
+        $entityManager = $this->getEntityManager();
+
+        $query = $entityManager->createQuery(
+            'SELECT o
+            FROM App\Entity\Oversight o
+            WHERE o.accountId = :accountId'
+        )->setParameter('accountId', $accountId);
+
+        return $query->getResult();
+
+    }
+
 }
 
 ?>
