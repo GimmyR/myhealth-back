@@ -53,7 +53,7 @@ class EntryDetailRepository extends ServiceEntityRepository {
             WHERE ed.entryId = :entryId
             AND ed.status = 1
             AND p.status = 1
-            ORDER BY oe.date ASC';
+            ORDER BY oe.date ASC, ed.parameterId ASC';
 
         $statement = $connection->prepare($sql);
         $resultSet = $statement->executeQuery([ 
