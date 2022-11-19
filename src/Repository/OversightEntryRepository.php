@@ -75,6 +75,79 @@ class OversightEntryRepository extends ServiceEntityRepository {
 
     }
 
+    public function edit($entry, $details) {
+        
+        $entityManager = $this->getEntityManager();
+        
+        try {
+
+            $entityManager->getConnection()->beginTransaction();
+
+            $query = $entityManager->createQuery(
+                'SELECT oe
+                FROM App\Entity\OversightEntry oe
+                WHERE oe.id = :id
+                AND oe.status = 1'
+            )->setParameter('id', $entry['id']);
+
+            $result1 = $query->getResult();
+            if(count($result1) != 1)
+                throw new RepositoryException("Entrée introuvable !");
+            $result1[0]->setDate($entry['date']);
+            
+            foreach($details as $detail) {
+
+                $query = $entityManager->createQuery(
+                    'SELECT ed
+                    FROM App\Entity\EntryDetail ed
+                    WHERE ed.id = :id
+                    AND ed.status = 1'
+                )->setParameter('id', $detail['id']);
+
+                $result2 = $query->getResult();
+                if(count($result2) != 1)
+                    throw new RepositoryException("Détail d'une entrée introuvable !");
+                $result2[0]->setValue($detail['value']);
+
+            }
+            
+            $entityManager->flush();
+            $entityManager->getConnection()->commit();
+
+        } catch(Exception $e) {
+
+            $entityManager->getConnection()->rollBack();
+            throw new RepositoryException('Données impossibles à enregistrer !');
+
+        }
+
+    }
+
+    public function findByIdAndAccountId(int $id, int $accountId) {
+
+        $connection = $this->getEntityManager()->getConnection();
+        $sql = 
+            'SELECT oe.*
+            FROM OversightEntry oe
+            JOIN Oversight o
+            ON oe.oversightId = o.id
+            WHERE oe.id = :id
+            AND o.accountId = :accountId'
+        ;
+        
+        $statement = $connection->prepare($sql);
+        $result = $statement->executeQuery([
+            'id' => $id,
+            'accountId' => $accountId
+        ]); $entry = $result->fetchAssociative();
+
+        if(!$entry)
+            throw new RepositoryException("Vous n'êtes pas associé à cette donnée !");
+        else
+            return $entry;
+
+    }
+
 }
 
 ?>
