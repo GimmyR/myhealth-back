@@ -54,7 +54,7 @@
 						<tbody>
 							{% for entry in entryDetails %}
 								<tr>
-									<td>{{entry.date}}</td>
+									<td>{{entry.date | date('d/m/Y h:i')}}</td>
 									{% for data in entry.data %}
 										<td>{{data.value}}</td>
 									{% endfor %}
