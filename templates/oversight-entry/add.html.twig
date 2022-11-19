@@ -29,7 +29,7 @@
                                     ({{ parameter.unit }})
                                 {% endif %}
                             </label>
-                            <input type="number" name="parameter-{{ parameter.id }}" class="form-control">
+                            <input type="number" name="parameter-{{ parameter.id }}" class="form-control" min="0" step="any">
                         </div>
                     {% endfor %}
                     <div class="mt-4 mb-3">

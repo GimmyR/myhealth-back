@@ -42,7 +42,7 @@ CREATE TABLE `EntryDetail` (
 	`id` INT NOT NULL AUTO_INCREMENT,
 	`entryId` INT NOT NULL,
 	`parameterId` INT NOT NULL,
-	`value` DECIMAL,
+	`value` DOUBLE,
 	`status` INT NOT NULL DEFAULT '1',
 	PRIMARY KEY (`id`)
 );
