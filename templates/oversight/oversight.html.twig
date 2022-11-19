@@ -55,12 +55,12 @@
 						<tbody>
 							{% for entry in entryDetails %}
 								<tr>
-									<td>{{entry.date | date('d/m/Y h:i')}}</td>
+									<td>{{entry.date | date('d/m/Y')}}</td>
 									{% for data in entry.data %}
 										<td>{{data.value}}</td>
 									{% endfor %}
 									<td>
-										<a href="/edit-oversight-entry/{{ entry.id }}"></a>
+										<a href="/edit-oversight-entry/{{ entry.id }}">Modifier</a>
 									</td>
 								</tr>
 							{% endfor %}

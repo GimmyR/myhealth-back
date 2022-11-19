@@ -121,6 +121,7 @@ class OversightController extends AbstractController {
         
         foreach($entries as $entry) 
             $entryDetails[] = [
+                'id' => $entry['id'],
                 'date' => $entry['date'],
                 'data' => $entryDetailRep->findAllByEntryId($entry['id'])
             ];
