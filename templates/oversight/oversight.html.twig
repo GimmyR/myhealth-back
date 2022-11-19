@@ -49,6 +49,7 @@
 										{% endif %}
 									</th>
 								{% endfor %}
+								<th></th>
 							</tr>
 						</thead>
 						<tbody>
@@ -58,6 +59,9 @@
 									{% for data in entry.data %}
 										<td>{{data.value}}</td>
 									{% endfor %}
+									<td>
+										<a href="/edit-oversight-entry/{{ entry.id }}"></a>
+									</td>
 								</tr>
 							{% endfor %}
 						</tbody>
