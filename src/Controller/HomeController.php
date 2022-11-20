@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Repository\AccountRepository;
 use App\Repository\OversightRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -51,6 +52,33 @@ class HomeController extends AbstractController {
 
     }
 
+    #[Route('/api/sign-in', name: 'home_sign_in_API')]
+    public function signIn_API(RequestStack $requestStack, AccountRepository $accountRep): JsonResponse {
+
+        $model = [ "status" => -1, "message" => "Problème inconnu !" ];
+        // ça c'est ce qu'on fait si on transmet les données par form-data
+        $email = $requestStack->getCurrentRequest()->request->get('email');
+        $password = $requestStack->getCurrentRequest()->request->get('password');
+        // mais on peut aussi utiliser $request->getContent()
+        // si nous envoyons les données en raw
+        $account = $accountRep->checkAccount($email, $password);
+        
+        if($account) {
+
+            $session = $requestStack->getSession();
+            $token = bin2hex(random_bytes(10));
+            while($session->get($token) != null)
+                $token = bin2hex(random_bytes(10));
+            
+            $model["token"] = $token;
+            $session->set($model["token"], $account[0]);
+            $model["status"] = 0;
+            $model["message"] = null;
+
+        } return $this->json($model);
+
+    }
+
     #[Route('/sign-out', name: 'home_sign_out')]
     public function signOut(RequestStack $requestStack): Response {
 
@@ -58,6 +86,21 @@ class HomeController extends AbstractController {
         $session->remove('account');
 
         return $this->redirectToRoute('home_index');
+
+    }
+
+    #[Route('/api/sign-out', name: 'home_sign_out_API')]
+    public function signOut_API(RequestStack $requestStack): JsonResponse {
+
+        $model = [ "status" => -1, "message" => "Problème inconnu !" ];
+        $token = $requestStack->getCurrentRequest()->request->get('token');
+        if($token != null) {
+            $session = $requestStack->getSession();
+            if($session->remove($token) != null) {
+                $model["status"] = 0;
+                $model["message"] = null;
+            }
+        } return $this->json($model);
 
     }
 
