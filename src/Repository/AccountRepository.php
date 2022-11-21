@@ -16,24 +16,26 @@ class AccountRepository extends ServiceEntityRepository {
 
     public function checkAccount($email, $password) {
 
-        $result = false; if($email != null && $password != null) {
+        if($email != null && $password != null) {
         
             $entityManager = $this->getEntityManager();
             $query = $entityManager->createQuery(
-
                 'SELECT a
                 FROM App\Entity\Account a
                 WHERE a.email = :email
                 AND a.password = :password'
-
             )->setParameters([
-
                 'email' => $email,
                 'password' => $password
-
             ]); $result = $query->getResult();
 
-        } return $result;
+            if(count($result) == 1)
+                return $result[0];
+            else
+                throw new RepositoryException("Adresse email ou mot de passe erroné !");
+
+        } else
+            throw new RepositoryException("Une coordonnée est inexistante !");
 
     }
 

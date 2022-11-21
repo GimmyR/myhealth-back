@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Repository\AccountRepository;
 use App\Repository\OversightRepository;
+use App\Repository\RepositoryException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -39,41 +40,49 @@ class HomeController extends AbstractController {
     #[Route('/sign-in', name: 'home_sign_in')]
     public function signIn(RequestStack $requestStack, AccountRepository $accountRep): Response {
 
+        $model = [ "status" => 0, "message" => null ];
         $email = $requestStack->getCurrentRequest()->request->get('email');
         $password = $requestStack->getCurrentRequest()->request->get('password');
-        $account = $accountRep->checkAccount($email, $password);
-        
-        if($account) {
 
+        try {
+
+            $account = $accountRep->checkAccount($email, $password);
             $session = $requestStack->getSession();
-            $session->set('account', $account[0]);
+            $session->set('account', $account);
+            return $this->redirectToRoute('home_index', $model);
+        
+        } catch(RepositoryException $e) {
 
-        } return $this->redirectToRoute('home_index', []);
+            $model["status"] = -1;
+            $model["message"] = $e->getMessage();
+            return $this->render("home/sign-in.html.twig", $model);
+
+        }
 
     }
 
     #[Route('/api/sign-in', name: 'home_sign_in_API')]
     public function signIn_API(RequestStack $requestStack, AccountRepository $accountRep): JsonResponse {
 
-        $model = [ "status" => -1, "message" => "Problème inconnu !" ];
-        // TRUE ici permet à la fonction de retourner un tableau associatif et non un objet
-        $data = json_decode($requestStack->getCurrentRequest()->getContent(), true);
-        $account = $accountRep->checkAccount($data["email"], $data["password"]);
-        
-        if($account) {
+        $model = [ "status" => 0, "message" => null ];
+        $requestContent = json_decode($requestStack->getCurrentRequest()->getContent());
 
+        try {
+
+            $account = $accountRep->checkAccount($requestContent->email, $requestContent->password);
             $session = $requestStack->getSession();
-            $token = bin2hex(random_bytes(10));
-            while($session->get($token) != null)
-                $token = bin2hex(random_bytes(10));
-            
-            $model["token"] = $token;
-            $session->set($model["token"], $account[0]);
-            $model["test"] = $session->get($model["token"]);
-            $model["status"] = 0;
-            $model["message"] = null;
+            $session->set('account', $account);
 
-        } return $this->json($model);
+        } catch(RepositoryException $e) {
+
+            $model["status"] = -1;
+            $model["message"] = $e->getMessage();
+
+        } finally {
+
+            return $this->json($model);
+
+        }
 
     }
 
@@ -90,16 +99,12 @@ class HomeController extends AbstractController {
     #[Route('/api/sign-out', name: 'home_sign_out_API')]
     public function signOut_API(RequestStack $requestStack): JsonResponse {
 
-        $model = [ "status" => -1, "message" => "Problème inconnu !" ];
-        $data = json_decode($requestStack->getCurrentRequest()->getContent(), true);
-        if($data != null) {
-            $session = $requestStack->getSession();
-            $account = $session->remove($data["token"]);
-            $model["test"] = $account;
-            if($account != null) {
-                $model["status"] = 0;
-                $model["message"] = null;
-            }
+        $model = [ "status" => 0, "message" => null ];
+        $session = $requestStack->getSession();
+        $account = $session->remove('account');
+        if($account == null) {
+            $model["status"] = -1;
+            $model["message"] = "Session introuvable !";
         } return $this->json($model);
 
     }
