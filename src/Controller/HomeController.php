@@ -69,6 +69,7 @@ class HomeController extends AbstractController {
             
             $model["token"] = $token;
             $session->set($model["token"], $account[0]);
+            $model["test"] = $session->get($model["token"]);
             $model["status"] = 0;
             $model["message"] = null;
 
@@ -93,7 +94,9 @@ class HomeController extends AbstractController {
         $data = json_decode($requestStack->getCurrentRequest()->getContent(), true);
         if($data != null) {
             $session = $requestStack->getSession();
-            if($session->remove($data["token"]) != null) {
+            $account = $session->remove($data["token"]);
+            $model["test"] = $account;
+            if($account != null) {
                 $model["status"] = 0;
                 $model["message"] = null;
             }
