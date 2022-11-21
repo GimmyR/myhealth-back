@@ -56,12 +56,9 @@ class HomeController extends AbstractController {
     public function signIn_API(RequestStack $requestStack, AccountRepository $accountRep): JsonResponse {
 
         $model = [ "status" => -1, "message" => "Problème inconnu !" ];
-        // ça c'est ce qu'on fait si on transmet les données par form-data
-        $email = $requestStack->getCurrentRequest()->request->get('email');
-        $password = $requestStack->getCurrentRequest()->request->get('password');
-        // mais on peut aussi utiliser $request->getContent()
-        // si nous envoyons les données en raw
-        $account = $accountRep->checkAccount($email, $password);
+        // TRUE ici permet à la fonction de retourner un tableau associatif et non un objet
+        $data = json_decode($requestStack->getCurrentRequest()->getContent(), true);
+        $account = $accountRep->checkAccount($data["email"], $data["password"]);
         
         if($account) {
 
@@ -93,10 +90,10 @@ class HomeController extends AbstractController {
     public function signOut_API(RequestStack $requestStack): JsonResponse {
 
         $model = [ "status" => -1, "message" => "Problème inconnu !" ];
-        $token = $requestStack->getCurrentRequest()->request->get('token');
-        if($token != null) {
+        $data = json_decode($requestStack->getCurrentRequest()->getContent(), true);
+        if($data != null) {
             $session = $requestStack->getSession();
-            if($session->remove($token) != null) {
+            if($session->remove($data["token"]) != null) {
                 $model["status"] = 0;
                 $model["message"] = null;
             }
