@@ -71,8 +71,7 @@ class HomeController extends AbstractController {
             $requestContent = json_decode($requestStack->getCurrentRequest()->getContent());
             $account = $accountRep->checkAccount($requestContent->email, $requestContent->password);
             $session = $requestStack->getSession();
-            $session->set('account', $account);
-            $model["test"] = $session->all();
+            $session->set("account", $account);
 
         } catch(RepositoryException $e) {
 
@@ -103,10 +102,10 @@ class HomeController extends AbstractController {
         $model = [ "status" => 0, "message" => null ];
 
         $session = $requestStack->getSession();
-        $model["test"] = $session->all();
-        $session->remove('account');
-        
-        return $this->json($model);
+        if($session->remove('account') == null) {
+            $model["status"] = -1;
+            $model["message"] = "Vous n'êtes pas authentifié !";
+        } return $this->json($model);
 
     }
 
