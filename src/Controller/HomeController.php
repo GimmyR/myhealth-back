@@ -65,13 +65,14 @@ class HomeController extends AbstractController {
     public function signIn_API(RequestStack $requestStack, AccountRepository $accountRep): JsonResponse {
 
         $model = [ "status" => 0, "message" => null ];
-        $requestContent = json_decode($requestStack->getCurrentRequest()->getContent());
 
         try {
 
+            $requestContent = json_decode($requestStack->getCurrentRequest()->getContent());
             $account = $accountRep->checkAccount($requestContent->email, $requestContent->password);
             $session = $requestStack->getSession();
             $session->set('account', $account);
+            $model["test"] = $session->all();
 
         } catch(RepositoryException $e) {
 
@@ -100,12 +101,12 @@ class HomeController extends AbstractController {
     public function signOut_API(RequestStack $requestStack): JsonResponse {
 
         $model = [ "status" => 0, "message" => null ];
+
         $session = $requestStack->getSession();
-        $account = $session->remove('account');
-        if($account == null) {
-            $model["status"] = -1;
-            $model["message"] = "Session introuvable !";
-        } return $this->json($model);
+        $model["test"] = $session->all();
+        $session->remove('account');
+        
+        return $this->json($model);
 
     }
 
