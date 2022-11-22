@@ -37,6 +37,28 @@ class HomeController extends AbstractController {
 
     }
 
+    #[Route('/api/home-index', name: 'home_index_API')]
+    public function index_API(RequestStack $requestStack, OversightRepository $oversightRep) : JsonResponse {
+
+        $session = $requestStack->getSession();
+        $account = $session->get('account');
+        $model = [
+            'status' => -1,
+            'message' => 'Vous n\'êtes pas authentifié !'
+        ];
+
+        if($account != false) {
+            $oversights = $oversightRep->findAllByAccountId($account->getId());
+            $model = [
+                'status' => 0,
+                'message' => null,
+                'account' => $account,
+                'oversights' => $oversights
+            ];
+        } return $this->json($model);
+
+    }
+
     #[Route('/sign-in', name: 'home_sign_in')]
     public function signIn(RequestStack $requestStack, AccountRepository $accountRep): Response {
 

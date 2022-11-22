@@ -8,6 +8,7 @@ use App\Repository\OversightRepository;
 use App\Repository\ParameterRepository;
 use App\Repository\RepositoryException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -49,6 +50,37 @@ class OversightController extends AbstractController {
 
     }
 
+    #[Route('/api/oversight/{oversightId}', name: 'oversight_show_API')]
+    public function show_API(int $oversightId, 
+                            RequestStack $requestStack,
+                                OversightRepository $oversightRep, 
+                                    ParameterRepository $parameterRep,
+                                        OversightEntryRepository $entryRep,
+                                            EntryDetailRepository $entryDetailRep): JsonResponse {
+
+        $model = [ 
+            'status' => -1,
+            'message' => 'Problème inconnu ! Appelez un administrateur !'
+        ];
+
+        $session = $requestStack->getSession();
+        $account = $session->get('account');
+
+        if($account == false) {
+            $model["status"] = -2;
+            $model["Vous n'êtes pas authentifié !"];
+        } else $model = $this->getModel(
+            $model, 
+            $account->getId(),
+            $oversightId, 
+            $oversightRep, 
+            $parameterRep, 
+            $entryRep, 
+            $entryDetailRep
+        ); return $this->json($model);
+
+    }
+
     protected function getModel(array $model, 
                                     int $accountId,
                                         int $oversightId, 
@@ -66,6 +98,7 @@ class OversightController extends AbstractController {
             $entries = $this->getOversightEntries($oversightId, $entryRep);
             $model['entryDetails'] = $this->getEntryDetailsByEntries($oversightId, $entries, $entryDetailRep);
             $model['status'] = 0;
+            $model['message'] = null;
 
         } catch(ControllerException | RepositoryException $e) {
 
