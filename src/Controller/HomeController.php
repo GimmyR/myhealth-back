@@ -52,7 +52,6 @@ class HomeController extends AbstractController {
             $model = [
                 'status' => 0,
                 'message' => null,
-                'account' => $account,
                 'oversights' => $oversights
             ];
         } return $this->json($model);
@@ -94,6 +93,7 @@ class HomeController extends AbstractController {
             $account = $accountRep->checkAccount($requestContent->email, $requestContent->password);
             $session = $requestStack->getSession();
             $session->set("account", $account);
+            $model["account"] = $account;
 
         } catch(RepositoryException $e) {
 
