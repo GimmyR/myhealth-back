@@ -12,6 +12,7 @@ use App\Repository\RepositoryException;
 use Doctrine\Persistence\ManagerRegistry;
 use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -39,6 +40,33 @@ class OversightEntryController extends AbstractController {
                 $model['message'] = $e->getMessage();
             } finally {
                 return $this->render('oversight-entry/add.html.twig', $model);
+            }
+        }
+
+    }
+
+    #[Route('/api/oversight-entry/{oversightId}', name: 'oversight_entry_index_API')]
+    public function index_API(int $oversightId,
+                            RequestStack $requestStack, 
+                            OversightRepository $oversightRep,
+                            ParameterRepository $parameterRep): JsonResponse {
+
+        $model = [ 'status' => 0, 'message' => null ];
+
+        $session = $requestStack->getSession();
+        $account = $session->get('account');
+        if($account == null){
+            $model["status"] = -2;
+            $model["message"] = "Vous n'êtes pas authentifié !";
+        } else {
+            try {
+                $model['oversight'] = $oversightRep->findByIdAndAccountId($oversightId, $account->getId());
+                $model['parameters'] = $parameterRep->findAllByOversightId($oversightId);
+            } catch(RepositoryException $e) {
+                $model['status'] = -1;
+                $model['message'] = $e->getMessage();
+            } finally {
+                return $this->json($model);
             }
         }
 
