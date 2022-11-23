@@ -126,6 +126,67 @@ class OversightEntryController extends AbstractController {
 
     }
 
+    #[Route('/api/oversight-entry/add/{oversightId}', name: 'oversight_entry_add_API')]
+    public function add_API(int $oversightId, 
+                            RequestStack $requestStack,
+                            OversightRepository $oversightRep,
+                            ParameterRepository $parameterRep,
+                            OversightEntryRepository $oversightEntryRep): Response {
+
+        $model = [ 'status' => 0, 'message' => null ];
+
+        $session = $requestStack->getSession();
+        $account = $session->get('account');
+        if($account == null) {
+            $model["status"] = -2;
+            $model["message"] = "Vous n'êtes pas authentifié !";
+        } else {
+
+            try {
+
+                $model['oversight'] = $oversightRep->findByIdAndAccountId($oversightId, $account->getId());
+                $model['parameters'] = $parameterRep->findAllByOversightId($oversightId);
+                $requestData = json_decode($requestStack->getCurrentRequest()->getContent());
+                
+                if($requestData != null) {
+
+                    $entry = new OversightEntry(
+                        $oversightId,
+                        $requestData->date,
+                        1
+                    ); $entry->validate();
+
+                    $details = [];
+
+                    foreach($requestData->parameters as $parameter) {
+
+                        $detail = new EntryDetail(
+                            0, 
+                            $parameter->id, 
+                            $parameter->value,
+                            1
+                        ); $detail->validate();
+
+                        $details[] = $detail;
+
+                    } $oversightEntryRep->add($entry, $details);
+
+                }
+
+            } catch(RepositoryException $e) {
+
+                $model['status'] = -1;
+                $model['message'] = $e->getMessage();
+
+            } finally {
+
+                return $this->json($model);
+
+            }
+        }
+
+    }
+
     #[Route('/oversight-entry/edit/{entryId}', name: 'oversight_entry_edit')]
     public function edit(int $entryId, 
                         RequestStack $requestStack,
