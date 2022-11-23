@@ -250,6 +250,68 @@ class OversightEntryController extends AbstractController {
 
     }
 
+    #[Route('/api/oversight-entry/edit/{entryId}', name: 'oversight_entry_edit_API')]
+    public function edit_API(int $entryId, 
+                        RequestStack $requestStack,
+                        OversightEntryRepository $oversightEntryRep,
+                        OversightRepository $oversightRep,
+                        ParameterRepository $parameterRep,
+                        EntryDetailRepository $entryDetailRep): Response {
+
+        $model = [ "status" => 0, "message" => null ];
+        $session = $requestStack->getSession();
+        $account = $session->get('account');
+        if($account == null) {
+            $model["status"] = -2;
+            $model["message"] = "Vous n'êtes pas authentifié !";
+        } else {
+
+            try {
+            
+                $entry = $oversightEntryRep->findByIdAndAccountId($entryId, $account->getId());
+                $oversight = $oversightRep->findByIdAndAccountId($entry['oversightId'], $account->getId());
+                $parameters = $parameterRep->findAllByOversightId($oversight->getId());
+                $details = $entryDetailRep->findAllByEntryId($entryId);
+                $requestData = json_decode($requestStack->getCurrentRequest()->getContent());
+
+                if($requestData != null && $requestData->date != null) {
+
+                    $entry['date'] = $requestData->date;
+                    for($i = 0; $i < count((array)$details); $i++) {
+                        foreach($requestData->parameters as $parameter) {
+                            if($parameter->value != null && 
+                                    $details[$i]['parameterId'] == $parameter->id && 
+                                    $details[$i]['value'] != $parameter->value) {
+                                $details[$i]['value'] = $parameter->value;
+                                break;
+                            }
+                        }
+                    } $oversightEntryRep->edit($entry, $details);
+
+                } else {
+
+                    $model['oversight'] = $oversight;
+                    $model['entry'] = $entry;
+                    $model['parameters'] = $parameters;
+                    $model['details'] = $details;
+
+                }
+
+            } catch(RepositoryException $e) {
+
+                $model['status'] = -1;
+                $model['message'] = $e->getMessage();
+
+            } finally {
+
+                return $this->json($model);
+                
+            }
+
+        }
+
+    }
+
 }
 
 ?>
