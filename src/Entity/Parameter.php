@@ -22,14 +22,14 @@ class Parameter {
     protected string $name;
 
     #[ORM\Column()]
-    protected string $unit;
+    protected $unit;
 
     #[ORM\Column()]
     protected int $status;
 
     // CONSTRUCT :
 
-    public function __construct(int $oversightId, string $name, string $unit, int $status) {
+    public function __construct(int $oversightId, string $name, $unit, int $status) {
         $this->setOversightId($oversightId);
         $this->setName($name);
         $this->setUnit($unit);
@@ -66,7 +66,7 @@ class Parameter {
         return $this->unit;
     }
 
-    public function setUnit(string $unit) {
+    public function setUnit($unit) {
         $this->unit = $unit;
     }
 

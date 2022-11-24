@@ -264,6 +264,7 @@ class OversightEntryController extends AbstractController {
         if($account == null) {
             $model["status"] = -2;
             $model["message"] = "Vous n'êtes pas authentifié !";
+            return $this->json($model);
         } else {
 
             try {

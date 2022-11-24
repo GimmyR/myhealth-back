@@ -2,11 +2,16 @@
 
 namespace App\Controller;
 
+use App\Entity\EntityException;
+use App\Entity\Oversight;
+use App\Entity\Parameter;
 use App\Repository\EntryDetailRepository;
 use App\Repository\OversightEntryRepository;
 use App\Repository\OversightRepository;
 use App\Repository\ParameterRepository;
 use App\Repository\RepositoryException;
+use DateTime;
+use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -192,6 +197,80 @@ class OversightController extends AbstractController {
             ];
 
         } return $chartDatas;
+
+    }
+
+    #[Route('/api/create-oversight/get', name: 'oversight_create_get_api')]
+    public function create_GET_API(RequestStack $reqStack, OversightRepository $oversightRep): JsonResponse {
+
+        $model = [ "status" => 0, "message" => null ];
+
+        $session = $reqStack->getSession();
+        $account = $session->get('account');
+
+        if($account == null) {
+            $model["status"] = -1;
+            $model["message"] = "Vous n'êtes pas authentifié !";
+        } return $this->json($model);
+
+    }
+
+    #[Route('/api/create-oversight/post', name: 'oversight_create_post_api')]
+    public function create_POST_API(RequestStack $reqStack, OversightRepository $oversightRep): JsonResponse {
+
+        $model = [ "status" => 0, "message" => null ];
+
+        $session = $reqStack->getSession();
+        $account = $session->get('account');
+
+        if($account == null) {
+            $model["status"] = -1;
+            $model["message"] = "Vous n'êtes pas authentifié !";
+            return $this->json($model);
+        } else {
+
+            try {
+            
+                $content = $reqStack->getCurrentRequest()->getContent();
+                $reqData = json_decode($content);
+                if($content != null && $reqData != null && $reqData->date != null && $reqData->title != null) {
+
+                    $oversight = new Oversight($account->getId(), $reqData->date, $reqData->title, 1);
+                    $oversight->validate();
+                    $parameters = [];
+                    foreach($reqData->parameters as $parameter) {
+                        if($parameter->name != null) {
+                            $param = new Parameter(0, $parameter->name, $parameter->unit, 1);
+                            $param->validate();
+                            $parameters[] = $param;
+                        } else throw new ControllerException("Veuillez bien remplir les formulaires, s'il vous plaît !");
+                    } $oversightRep->create($oversight, $parameters);
+
+                } else {
+
+                    $model["status"] = -2;
+                    $model["message"] = "Veuillez bien remplir les formulaires, s'il vous plaît !";
+
+                }
+
+            } catch(ControllerException | RepositoryException | EntityException $e) {
+
+                $model["status"] = -3;
+                $model["message"] = $e->getMessage();
+
+            } catch(Exception $e) {
+
+                $model["status"] = -4;
+                $model["message"] = "Appelez un administrateur !";
+                $model["technical-issues"] = $e->getMessage();
+
+            } finally {
+
+                return $this->json($model);
+
+            }
+
+        }
 
     }
 
