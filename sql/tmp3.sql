@@ -1,1 +1,1 @@
-DROP DATABASE myhealth;
+UPDATE Parameter SET status = 1 WHERE id = 8;

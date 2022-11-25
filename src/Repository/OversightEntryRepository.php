@@ -27,11 +27,9 @@ class OversightEntryRepository extends ServiceEntityRepository {
         ;
 
         $statement = $connection->prepare($sql);
-        $resultSet = $statement->executeQuery(
-            [
+        $resultSet = $statement->executeQuery([
                 'oversightId' => $oversightId
-            ]
-        ); return $resultSet->fetchAllAssociative();
+        ]); return $resultSet->fetchAllAssociative();
 
     }
 
@@ -139,12 +137,7 @@ class OversightEntryRepository extends ServiceEntityRepository {
         $result = $statement->executeQuery([
             'id' => $id,
             'accountId' => $accountId
-        ]); $entry = $result->fetchAssociative();
-
-        if(!$entry)
-            throw new RepositoryException("Vous n'êtes pas associé à cette donnée !");
-        else
-            return $entry;
+        ]); return $result->fetchAssociative();
 
     }
 

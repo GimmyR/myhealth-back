@@ -26,16 +26,9 @@ class ParameterRepository extends ServiceEntityRepository {
             ORDER BY p.id ASC';
 
         $statement = $connection->prepare($sql);
-        $resultSet = $statement->executeQuery(
-            [
+        $resultSet = $statement->executeQuery([
                 'oversightId' => $oversightId
-            ]
-        ); $result = (array)$resultSet->fetchAllAssociative();
-
-        if(count($result) == 0)
-            throw new RepositoryException('Aucun paramètre n\'a été trouvé !');
-        else
-            return $result;
+        ]); return (array)$resultSet->fetchAllAssociative();
 
     }
 

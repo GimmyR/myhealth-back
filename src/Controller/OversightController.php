@@ -29,8 +29,8 @@ class OversightController extends AbstractController {
                                             EntryDetailRepository $entryDetailRep): Response {
 
         $model = [ 
-            'status' => -1,
-            'message' => 'Problème inconnu ! Appelez un administrateur !'
+            'status' => 0,
+            'message' => null
         ];
 
         $session = $requestStack->getSession();
@@ -64,15 +64,15 @@ class OversightController extends AbstractController {
                                             EntryDetailRepository $entryDetailRep): JsonResponse {
 
         $model = [ 
-            'status' => -1,
-            'message' => 'Problème inconnu ! Appelez un administrateur !'
+            'status' => 0,
+            'message' => null
         ];
 
         $session = $requestStack->getSession();
         $account = $session->get('account');
 
         if($account == false) {
-            $model["status"] = -2;
+            $model["status"] = -1;
             $model["Vous n'êtes pas authentifié !"];
         } else $model = $this->getModel(
             $model, 
@@ -105,8 +105,9 @@ class OversightController extends AbstractController {
             $model['status'] = 0;
             $model['message'] = null;
 
-        } catch(ControllerException | RepositoryException $e) {
+        } catch(Exception $e) {
 
+            $model['status'] = -2;
             $model['message'] = $e->getMessage();
 
         } finally {
@@ -122,7 +123,7 @@ class OversightController extends AbstractController {
         $parameters = $parameterRep->findAllByOversightId($oversightId);
 
         if(!$parameters)
-            throw new ControllerException("Aucun paramètre n'est associé à cette surveillance !");
+            return [];
         else
             return $parameters;
 
@@ -132,13 +133,12 @@ class OversightController extends AbstractController {
 
         $entryDetails = [];
         
-        foreach($parameters as $parameter) 
-            $entryDetails[$parameter['name']] = $entryDetailRep->findAllByParameterId($parameter['id']);
-
-        if(!$entryDetails)
-            throw new ControllerException("Détails introuvables (1) !");
-        else
-            return $entryDetails;
+        foreach($parameters as $parameter) {
+            $detail = $entryDetailRep->findAllByParameterId($parameter['id']);
+            if(!$detail)
+                $entryDetails[$parameter['name']] = [];
+            else $entryDetails[$parameter['name']] = $detail;
+        } return $entryDetails;
 
     }
 
@@ -147,7 +147,7 @@ class OversightController extends AbstractController {
         $entries = $entryRep->findAllByOversightId($oversightId);
 
         if(!$entries)
-            throw new ControllerException("Entrées introuvables !");
+            return [];
         else
             return $entries;
 
@@ -157,17 +157,22 @@ class OversightController extends AbstractController {
 
         $entryDetails = [];
         
-        foreach($entries as $entry) 
-            $entryDetails[] = [
-                'id' => $entry['id'],
-                'date' => $entry['date'],
-                'data' => $entryDetailRep->findAllByEntryId($entry['id'])
-            ];
-
-        if(!$entryDetails)
-            throw new ControllerException("Détails introuvables (2) !");
-        else
-            return $entryDetails;
+        foreach($entries as $entry) {
+            $data = $entryDetailRep->findAllByEntryId($entry['id']);
+            if(!$data) {
+                $entryDetails[] = [
+                    'id' => $entry['id'],
+                    'date' => $entry['date'],
+                    'data' => []
+                ];
+            } else {
+                $entryDetails[] = [
+                    'id' => $entry['id'],
+                    'date' => $entry['date'],
+                    'data' => $data
+                ];
+            }
+        } return $entryDetails;
 
     }
 
@@ -201,7 +206,7 @@ class OversightController extends AbstractController {
     }
 
     #[Route('/api/create-oversight/get', name: 'oversight_create_get_api')]
-    public function create_GET_API(RequestStack $reqStack, OversightRepository $oversightRep): JsonResponse {
+    public function create_GET_API(RequestStack $reqStack): JsonResponse {
 
         $model = [ "status" => 0, "message" => null ];
 
@@ -271,6 +276,88 @@ class OversightController extends AbstractController {
             }
 
         }
+
+    }
+
+    #[Route('/api/edit-oversight/get/{id}', name: 'oversight_edit_get_api')]
+    public function edit_GET_API(int $id, 
+                                    RequestStack $reqStack, 
+                                    OversightRepository $oversightRep,
+                                    ParameterRepository $parameterRep): JsonResponse {
+
+        $model = [ "status" => 0, "message" => null ];
+
+        $session = $reqStack->getSession();
+        $account = $session->get('account');
+
+        if($account == null) {
+            $model["status"] = -1;
+            $model["message"] = "Vous n'êtes pas authentifié !";
+        } else {
+            try {
+                $model["oversight"] = $oversightRep->findByIdAndAccountId($id, $account->getId());
+                $model["parameters"] = $parameterRep->findAllByOversightId($model["oversight"]->getId());
+            } catch(RepositoryException $e) {
+                $model["status"] = -2;
+                $model["message"] = $e->getMessage();
+            }
+        } return $this->json($model);
+
+    }
+
+    #[Route('/api/edit-oversight/post/', name: 'oversight_edit_post_api')]
+    public function edit_POST_API(RequestStack $reqStack, OversightRepository $oversightRep): JsonResponse {
+
+        $model = [ "status" => 0, "message" => null ];
+
+        $session = $reqStack->getSession();
+        $account = $session->get('account');
+
+        if($account == null) {
+            $model["status"] = -1;
+            $model["message"] = "Vous n'êtes pas authentifié !";
+        } else {
+
+            try {
+            
+                $content = $reqStack->getCurrentRequest()->getContent();
+                $reqData = json_decode($content);
+                if($content != null && $reqData != null && $reqData->id != null && $reqData->date != null && $reqData->title != null) {
+
+                    $oversight = new Oversight($account->getId(), $reqData->date, $reqData->title, 1);
+                    $oversight->setId($reqData->id);
+                    $oversight->validate();
+                    $parameters = [];
+                    foreach($reqData->parameters as $parameter) {
+                        if($parameter->name != null) {
+                            $param = new Parameter($oversight->getId(), $parameter->name, $parameter->unit, 1);
+                            $param->setId($parameter->id);
+                            $param->validate();
+                            $parameters[] = $param;
+                        } else throw new ControllerException("Veuillez bien remplir les formulaires, s'il vous plaît !");
+                    } $oversightRep->edit($account->getId(), $oversight, $parameters);
+
+                } else {
+
+                    $model["status"] = -2;
+                    $model["message"] = "Veuillez bien remplir les formulaires, s'il vous plaît !";
+
+                }
+
+            } catch(ControllerException | RepositoryException | EntityException $e) {
+
+                $model["status"] = -3;
+                $model["message"] = $e->getMessage();
+
+            } catch(Exception $e) {
+
+                $model["status"] = -4;
+                $model["message"] = "Appelez un administrateur !";
+                $model["technical-issues"] = $e->getMessage();
+
+            }
+
+        } return $this->json($model);
 
     }
 

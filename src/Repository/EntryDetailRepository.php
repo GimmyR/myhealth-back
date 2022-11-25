@@ -33,9 +33,7 @@ class EntryDetailRepository extends ServiceEntityRepository {
         $statement = $connection->prepare($sql);
         $resultSet = $statement->executeQuery([ 
             'parameterId' => $parameterId
-        ]);
-
-        return $resultSet->fetchAllAssociative();
+        ]); return $resultSet->fetchAllAssociative();
 
     }
 
@@ -58,9 +56,7 @@ class EntryDetailRepository extends ServiceEntityRepository {
         $statement = $connection->prepare($sql);
         $resultSet = $statement->executeQuery([ 
             'entryId' => $entryId
-        ]);
-
-        return $resultSet->fetchAllAssociative();
+        ]); return $resultSet->fetchAllAssociative();
 
     }
 

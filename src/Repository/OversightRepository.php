@@ -86,7 +86,7 @@ class OversightRepository extends ServiceEntityRepository {
     }
 
     public function createParameters(EntityManager $entityManager, 
-                                        string $oversightId, 
+                                        int $oversightId, 
                                         array $parameters) {
 
         foreach($parameters as $parameter) {
@@ -113,6 +113,68 @@ class OversightRepository extends ServiceEntityRepository {
         if(count($resultSet) == 1)
             return $resultSet[0];
         else throw new RepositoryException("Surveillance introuvable !");
+
+    }
+
+    public function edit(int $accountId, Oversight $oversight, array $parameters) {
+
+        $entityManager = $this->getEntityManager();
+
+        try {
+
+            $entityManager->getConnection()->beginTransaction();
+
+            $os = $this->findByIdAndAccountId($oversight->getId(), $accountId);
+            $os->setDate($oversight->getDate());
+            $os->setTitle($oversight->getTitle());
+            $this->editParameters($entityManager, $oversight->getId(), $parameters);
+            $entityManager->flush();
+            
+            $entityManager->getConnection()->commit();
+
+        } catch(Exception $e) {
+
+            $entityManager->getConnection()->rollBack();
+            throw new RepositoryException("Impossible de créer votre surveillance !");
+
+        }
+
+    }
+
+    public function editParameters(EntityManager $entityManager, 
+                                        int $oversightId, 
+                                        array $parameters) {
+
+        $params = $this->findAllParametersByOversightId($entityManager, $oversightId);
+
+        foreach($params as $param) {
+            $param->setStatus(0);
+            foreach($parameters as $parameter) {
+                if($param->getId() == $parameter->getId()) {
+                    $param->setName($parameter->getName());
+                    $param->setUnit($parameter->getUnit());
+                    $param->setStatus(1);
+                    break;
+                }
+            }
+        }
+
+        foreach($parameters as $parameter) {
+            if($parameter->getId() == 0)
+                $entityManager->persist($parameter);
+        }
+
+    }
+
+    public function findAllParametersByOversightId(EntityManager $entityManager, int $oversightId) {
+
+        $query = $entityManager->createQuery(
+            "SELECT p
+            FROM App\Entity\Parameter p
+            WHERE p.oversightId = :oversightId"
+        )->setParameter("oversightId", $oversightId);
+
+        return $query->getResult();
 
     }
 
