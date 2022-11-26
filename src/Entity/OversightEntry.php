@@ -24,14 +24,6 @@ class OversightEntry {
     #[ORM\Column()]
     protected int $status;
 
-    // CONSTRUCT :
-
-    public function __construct(int $oversightId, string $date, int $status) {
-        $this->setOversightId($oversightId);
-        $this->setDate($date);
-        $this->setStatus($status);
-    }
-
     // GETTERS AND SETTERS :
 
     public function getId(): int {

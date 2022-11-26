@@ -91,23 +91,19 @@ class OversightEntryController extends AbstractController {
 
                 $model['oversight'] = $oversightRep->findByIdAndAccountId($oversightId, $account->getId());
                 $model['parameters'] = $parameterRep->findAllByOversightId($oversightId);
-                $entry = new OversightEntry(
-                    $oversightId,
-                    $requestStack->getCurrentRequest()->request->get('date'),
-                    1
-                ); $entry->validate();
+                $entry = new OversightEntry;
+                $entry->setOversightId($oversightId);
+                $entry->setDate($requestStack->getCurrentRequest()->request->get('date'));
+                $entry->setStatus(1);
 
                 $details = [];
 
                 foreach($model['parameters'] as $parameter) {
 
-                    $detail = new EntryDetail(
-                        0, 
-                        $parameter['id'], 
-                        $requestStack->getCurrentRequest()->request->get('parameter-'. $parameter['id']),
-                        1
-                    ); $detail->validate();
-
+                    $detail = new EntryDetail;
+                    $detail->setParameterId($parameter["id"]);
+                    $detail->setValue($requestStack->getCurrentRequest()->request->get('parameter-'. $parameter['id']));
+                    $detail->setStatus(1);
                     $details[] = $detail;
 
                 } $oversightEntryRep->add($entry, $details);
@@ -150,23 +146,19 @@ class OversightEntryController extends AbstractController {
                 
                 if($requestData != null) {
 
-                    $entry = new OversightEntry(
-                        $oversightId,
-                        $requestData->date,
-                        1
-                    ); $entry->validate();
+                    $entry = new OversightEntry;
+                    $entry->setOversightId($oversightId);
+                    $entry->setDate($requestData->date);
+                    $entry->setStatus(1);
 
                     $details = [];
 
                     foreach($requestData->parameters as $parameter) {
 
-                        $detail = new EntryDetail(
-                            0, 
-                            $parameter->id, 
-                            $parameter->value,
-                            1
-                        ); $detail->validate();
-
+                        $detail = new EntryDetail;
+                        $detail->$parameter->id;
+                        $detail->$parameter->value;
+                        $detail->setStatus(1);
                         $details[] = $detail;
 
                     } $oversightEntryRep->add($entry, $details);

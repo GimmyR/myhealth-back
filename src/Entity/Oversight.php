@@ -28,17 +28,6 @@ class Oversight {
     #[ORM\Column()]
     protected int $status;
 
-    // CONSTRUCT :
-
-    public function __construct(int $accountId, string $date, string $title, int $status) {
-        
-        $this->setAccountId($accountId);
-        $this->setDate($date);
-        $this->setTitle($title);
-        $this->setStatus($status);
-
-    }
-
     // GETTERS AND SETTERS :
 
     public function getId(): int {

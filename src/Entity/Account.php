@@ -36,18 +36,6 @@ class Account {
         '/[\'"^£$%&*()}{#~?><>,|=_+¬-]/'
     ];
 
-    // CONSTRUCT :
-
-    public function __construct(string $firstname, string $lastname, string $email, string $password, int $status) {
-
-        $this->setFirstname($firstname);
-        $this->setLastname($lastname);
-        $this->setEmail($email);
-        $this->setPassword($password);
-        $this->setStatus($status);
-
-    }
-
     // GETTERS AND SETTERS :
 
     public function getId(): int {

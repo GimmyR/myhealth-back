@@ -27,15 +27,6 @@ class EntryDetail {
     #[ORM\Column()]
     protected int $status;
 
-    // CONSTRUCT :
-
-    public function __construct(int $entryId, int $parameterId, float $value, int $status) {
-        $this->setEntryId($entryId);
-        $this->setParameterId($parameterId);
-        $this->setValue($value);
-        $this->setStatus($status);
-    }
-
     // GETTERS AND SETTERS :
 
     public function getId(): int {

@@ -45,9 +45,9 @@ class HomeController extends AbstractController {
         $model = [
             'status' => -1,
             'message' => 'Vous n\'êtes pas authentifié !'
-        ];
+        ]; $model["account"] = $account;
 
-        if($account != false) {
+        if($account != null) {
             $oversights = $oversightRep->findAllByAccountId($account->getId());
             $model = [
                 'status' => 0,
@@ -93,7 +93,6 @@ class HomeController extends AbstractController {
             $account = $accountRep->checkAccount($requestContent->email, $requestContent->password);
             $session = $requestStack->getSession();
             $session->set("account", $account);
-            $model["account"] = $account;
 
         } catch(RepositoryException $e) {
 

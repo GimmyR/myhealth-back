@@ -27,15 +27,6 @@ class Parameter {
     #[ORM\Column()]
     protected int $status;
 
-    // CONSTRUCT :
-
-    public function __construct(int $oversightId, string $name, $unit, int $status) {
-        $this->setOversightId($oversightId);
-        $this->setName($name);
-        $this->setUnit($unit);
-        $this->setStatus($status);
-    }
-
     // GETTERS AND SETTERS :
 
     public function getId(): int {

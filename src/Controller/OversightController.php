@@ -240,13 +240,18 @@ class OversightController extends AbstractController {
                 $reqData = json_decode($content);
                 if($content != null && $reqData != null && $reqData->date != null && $reqData->title != null) {
 
-                    $oversight = new Oversight($account->getId(), $reqData->date, $reqData->title, 1);
-                    $oversight->validate();
+                    $oversight = new Oversight;
+                    $oversight->setAccountId($account->getId());
+                    $oversight->setDate($reqData->date);
+                    $oversight->setTitle($reqData->title);
+                    $oversight->setStatus(1);
                     $parameters = [];
                     foreach($reqData->parameters as $parameter) {
                         if($parameter->name != null) {
-                            $param = new Parameter(0, $parameter->name, $parameter->unit, 1);
-                            $param->validate();
+                            $param = new Parameter;
+                            $param->setName($parameter->name);
+                            $param->setUnit($parameter->unit);
+                            $param->setStatus(1);
                             $parameters[] = $param;
                         } else throw new ControllerException("Veuillez bien remplir les formulaires, s'il vous plaît !");
                     } $oversightRep->create($oversight, $parameters);
@@ -324,15 +329,20 @@ class OversightController extends AbstractController {
                 $reqData = json_decode($content);
                 if($content != null && $reqData != null && $reqData->id != null && $reqData->date != null && $reqData->title != null) {
 
-                    $oversight = new Oversight($account->getId(), $reqData->date, $reqData->title, 1);
+                    $oversight = new Oversight;
                     $oversight->setId($reqData->id);
-                    $oversight->validate();
+                    $oversight->setAccountId($account->getId());
+                    $oversight->setDate($reqData->date);
+                    $oversight->setTitle($reqData->title);
+                    $oversight->setStatus(1);
                     $parameters = [];
                     foreach($reqData->parameters as $parameter) {
                         if($parameter->name != null) {
-                            $param = new Parameter($oversight->getId(), $parameter->name, $parameter->unit, 1);
+                            $param = new Parameter;
                             $param->setId($parameter->id);
-                            $param->validate();
+                            $param->setName($parameter->name);
+                            $param->setUnit($parameter->unit);
+                            $param->setStatus(1);
                             $parameters[] = $param;
                         } else throw new ControllerException("Veuillez bien remplir les formulaires, s'il vous plaît !");
                     } $oversightRep->edit($account->getId(), $oversight, $parameters);

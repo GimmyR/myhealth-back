@@ -1,1 +1,1 @@
-SELECT * FROM Parameter;
+SELECT * FROM Oversight;
