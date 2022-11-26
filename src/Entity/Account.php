@@ -103,6 +103,10 @@ class Account {
 
     // METHODS :
 
+    public function hidePassword() {
+        $this->password = "********";
+    }
+
 }
 
 ?>

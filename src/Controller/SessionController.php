@@ -19,6 +19,7 @@ class SessionController extends AbstractController {
             $model["status"] = -1;
             $model["message"] = "Vous n'êtes pas authentifié !";
         } else {
+            $account->hidePassword();
             $model["account"] = $account;
         } return $this->json($model);
 
