@@ -13,30 +13,6 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class HomeController extends AbstractController {
 
-    #[Route('/', name: 'home_index')]
-    public function index(RequestStack $requestStack, OversightRepository $oversightRep) : Response {
-
-        $session = $requestStack->getSession();
-        $account = $session->get('account');
-        $twigPage = 'home/sign-in.html.twig';
-        $models = [
-            'status' => -1,
-            'message' => 'Vous n\'êtes pas connecté !'
-        ];
-
-        if($account != false) {
-            $oversights = $oversightRep->findAllByAccountId($account->getId());
-            $twigPage = 'home/home.html.twig';
-            $models = [
-                'status' => 0,
-                'message' => null,
-                'account' => $account,
-                'oversights' => $oversights
-            ];
-        } return $this->render($twigPage, $models);
-
-    }
-
     #[Route('/api/home-index', name: 'home_index_API')]
     public function index_API(RequestStack $requestStack, OversightRepository $oversightRep) : JsonResponse {
 
@@ -55,30 +31,6 @@ class HomeController extends AbstractController {
                 'oversights' => $oversights
             ];
         } return $this->json($model);
-
-    }
-
-    #[Route('/sign-in', name: 'home_sign_in')]
-    public function signIn(RequestStack $requestStack, AccountRepository $accountRep): Response {
-
-        $model = [ "status" => 0, "message" => null ];
-        $email = $requestStack->getCurrentRequest()->request->get('email');
-        $password = $requestStack->getCurrentRequest()->request->get('password');
-
-        try {
-
-            $account = $accountRep->checkAccount($email, $password);
-            $session = $requestStack->getSession();
-            $session->set('account', $account);
-            return $this->redirectToRoute('home_index', $model);
-        
-        } catch(RepositoryException $e) {
-
-            $model["status"] = -1;
-            $model["message"] = $e->getMessage();
-            return $this->render("home/sign-in.html.twig", $model);
-
-        }
 
     }
 
@@ -104,16 +56,6 @@ class HomeController extends AbstractController {
             return $this->json($model);
 
         }
-
-    }
-
-    #[Route('/sign-out', name: 'home_sign_out')]
-    public function signOut(RequestStack $requestStack): Response {
-
-        $session = $requestStack->getSession();
-        $session->remove('account');
-
-        return $this->redirectToRoute('home_index');
 
     }
 

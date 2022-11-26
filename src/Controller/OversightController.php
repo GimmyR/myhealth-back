@@ -20,41 +20,6 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class OversightController extends AbstractController {
 
-    #[Route('/oversight/{oversightId}', name: 'oversight_show')]
-    public function show(int $oversightId, 
-                            RequestStack $requestStack,
-                                OversightRepository $oversightRep, 
-                                    ParameterRepository $parameterRep,
-                                        OversightEntryRepository $entryRep,
-                                            EntryDetailRepository $entryDetailRep): Response {
-
-        $model = [ 
-            'status' => 0,
-            'message' => null
-        ];
-
-        $session = $requestStack->getSession();
-        $account = $session->get('account');
-
-        if($account == false)
-            return $this->redirectToRoute('home_index');
-        else {
-            return $this->render(
-                'oversight/oversight.html.twig', 
-                $this->getModel(
-                    $model, 
-                    $account->getId(),
-                    $oversightId, 
-                    $oversightRep, 
-                    $parameterRep, 
-                    $entryRep, 
-                    $entryDetailRep
-                )
-            );
-        }
-
-    }
-
     #[Route('/api/oversight/{oversightId}', name: 'oversight_show_API')]
     public function show_API(int $oversightId, 
                             RequestStack $requestStack,
