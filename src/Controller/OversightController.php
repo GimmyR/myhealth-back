@@ -170,21 +170,6 @@ class OversightController extends AbstractController {
 
     }
 
-    #[Route('/api/create-oversight/get', name: 'oversight_create_get_api')]
-    public function create_GET_API(RequestStack $reqStack): JsonResponse {
-
-        $model = [ "status" => 0, "message" => null ];
-
-        $session = $reqStack->getSession();
-        $account = $session->get('account');
-
-        if($account == null) {
-            $model["status"] = -1;
-            $model["message"] = "Vous n'êtes pas authentifié !";
-        } return $this->json($model);
-
-    }
-
     #[Route('/api/create-oversight/post', name: 'oversight_create_post_api')]
     public function create_POST_API(RequestStack $reqStack, OversightRepository $oversightRep): JsonResponse {
 
