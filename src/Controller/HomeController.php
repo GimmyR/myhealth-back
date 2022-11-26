@@ -45,7 +45,7 @@ class HomeController extends AbstractController {
         $model = [
             'status' => -1,
             'message' => 'Vous n\'êtes pas authentifié !'
-        ]; $model["account"] = $account;
+        ];
 
         if($account != null) {
             $oversights = $oversightRep->findAllByAccountId($account->getId());
