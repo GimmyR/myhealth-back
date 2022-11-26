@@ -51,7 +51,10 @@ class Account {
     }
 
     public function setFirstname(string $firstname) {
-        $this->firstname = $firstname;
+        if($firstname == null || strlen($firstname) > 100 || preg_match(Account::$specialCharacters[0], $firstname))
+            throw new EntityException("Votre prénom est invalide !");
+        else
+            $this->firstname = $firstname;
     }
 
     public function getLastname(): string {
@@ -59,7 +62,10 @@ class Account {
     }
 
     public function setLastname(string $lastname) {
-        $this->lastname = $lastname;
+        if($lastname == null || strlen($lastname) > 100 || preg_match(Account::$specialCharacters[0], $lastname))
+            throw new EntityException("Votre nom est invalide !");
+        else
+            $this->lastname = $lastname;
     }
 
     public function getEmail(): string {
@@ -67,7 +73,10 @@ class Account {
     }
 
     public function setEmail(string $email) {
-        $this->email = $email;
+        if($email == null || strlen($email) > 255 || preg_match(Account::$specialCharacters[1], $email))
+            throw new EntityException("Votre adresse email est invalide !");
+        else
+            $this->email = $email;
     }
 
     public function getPassword(): string {
@@ -75,7 +84,10 @@ class Account {
     }
 
     public function setPassword(string $password) {
-        $this->password = $password;
+        if($password == null || strlen($password) > 50 || preg_match(Account::$specialCharacters[1], $password))
+            throw new EntityException("Votre mot de passe est invalide !");
+        else
+            $this->password = $password;
     }
 
     public function getStatus(): int {
@@ -83,45 +95,13 @@ class Account {
     }
 
     public function setStatus(int $status) {
-        $this->status = $status;
+        if($status != 0 && $status != 1)
+            throw new EntityException("Le statut du compte est invalide !");
+        else
+            $this->status = $status;
     }
 
     // METHODS :
-
-    public function validateFirstname() {
-        if($this->firstname == null || strlen($this->firstname) > 100 || preg_match(Account::$specialCharacters[0], $this->firstname))
-            throw new EntityException("First name is invalid !");
-    }
-
-    public function validateLastname() {
-        if($this->lastname == null || strlen($this->lastname) > 100 || preg_match(Account::$specialCharacters[0], $this->lastname))
-            throw new EntityException("Last name is invalid !");
-    }
-
-    public function validateEmail() {
-        if($this->email == null || strlen($this->email) > 255 || preg_match(Account::$specialCharacters[1], $this->email))
-            throw new EntityException("Email address is invalid !");
-    }
-
-    public function validatePassword() {
-        if($this->password == null || strlen($this->password) > 50 || preg_match(Account::$specialCharacters[1], $this->password))
-            throw new EntityException("Password is invalid !");
-    }
-
-    public function validateStatus() {
-        if($this->status != 0 && $this->status != 1)
-            throw new EntityException("Status is invalid !");
-    }
-
-    public function validate(): void {
-
-        $this->validateFirstname();
-        $this->validateLastname();
-        $this->validateEmail();
-        $this->validatePassword();
-        $this->validateStatus();
-
-    }
 
 }
 

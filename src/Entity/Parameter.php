@@ -50,7 +50,10 @@ class Parameter {
     }
 
     public function setName(string $name) {
-        $this->name = $name;
+        if(empty($name))
+            throw new EntityException("Le nom d'une paramètre est invalide !");
+        else
+            $this->name = $name;
     }
 
     public function getUnit(): string {
@@ -66,25 +69,13 @@ class Parameter {
     }
 
     public function setStatus(int $status) {
-        $this->status = $status;
+        if($status != 0 && $status != 1)
+            throw new EntityException("Le statut de la paramètre est invalide !");
+        else
+            $this->status = $status;
     }
 
     // METHODS :
-
-    public function validateName() {
-        if(empty($this->name))
-            throw new EntityException("Name is invalid !");
-    }
-
-    public function validateStatus() {
-        if($this->status != 0 && $this->status != 1)
-            throw new EntityException("Status is invalid !");
-    }
-
-    public function validate() {
-        $this->validateName();
-        $this->validateStatus();
-    }
 
 }
 

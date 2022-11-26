@@ -55,19 +55,13 @@ class OversightEntry {
     }
 
     public function setStatus(int $status) {
-        $this->status = $status;
+        if($status != 0 && $status != 1)
+            throw new EntityException("Le statut de l'entrée est invalide !");
+        else
+            $this->status = $status;
     }
 
     // METHODS :
-
-    public function validateStatus() {
-        if($this->status != 0 && $this->status != 1)
-            throw new EntityException("Status is invalid !");
-    }
-
-    public function validate() {
-        $this->validateStatus();
-    }
 
 }
 

@@ -59,7 +59,10 @@ class Oversight {
     }
 
     public function setTitle(string $title) {
-        $this->title = $title;
+        if(empty($title))
+            throw new EntityException("Le titre est invalide !");
+        else
+            $this->title = $title;
     }
 
     public function getStatus(): int {
@@ -67,27 +70,13 @@ class Oversight {
     }
 
     public function setStatus(int $status) {
-        $this->status = $status;
+        if($status != 0 && $status != 1)
+            throw new EntityException("Le statut de la surveillance est invalide !");
+        else
+            $this->status = $status;
     }
 
     // METHODS :
-
-    public function validateTitle() {
-        if(empty($this->title))
-            throw new EntityException("Title is invalid !");
-    }
-
-    public function validateStatus() {
-        if($this->status != 0 && $this->status != 1)
-            throw new EntityException("Status is invalid !");
-    }
-
-    public function validate() {
-
-        $this->validateTitle();
-        $this->validateStatus();
-
-    }
 
 }
 

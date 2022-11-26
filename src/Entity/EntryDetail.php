@@ -58,7 +58,10 @@ class EntryDetail {
     }
 
     public function setValue(float $value) {
-        $this->value = $value;
+        if($value < 0)
+            throw new EntityException("La valeur d'une donnée est invalide !");
+        else
+            $this->value = $value;
     }
 
     public function getStatus(): int {
@@ -66,25 +69,13 @@ class EntryDetail {
     }
 
     public function setStatus(int $status) {
-        $this->status = $status;
+        if($status != 0 && $status != 1)
+            throw new EntityException("Le statut d'une donnée est invalide !");
+        else
+            $this->status = $status;
     }
 
     // METHODS :
-
-    public function validateValue() {
-        if($this->value < 0)
-            throw new EntityException("Value is invalid !");
-    }
-
-    public function validateStatus() {
-        if($this->status != 0 && $this->status != 1)
-            throw new EntityException("Status is invalid !");
-    }
-
-    public function validate() {
-        $this->validateValue();
-        $this->validateStatus();
-    }
 
 }
 
