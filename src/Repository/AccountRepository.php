@@ -59,6 +59,37 @@ class AccountRepository extends ServiceEntityRepository {
 
     }
 
+    public function editAccountByCode(string $email, $sentCode, $trueCode, $newPassword) {
+
+        if($sentCode != $trueCode)
+            throw new RepositoryException("Le code est invalide !");
+        else {
+            $account = $this->findByEmail($email);
+            $account->setPassword($newPassword);
+            $this->getEntityManager()->flush();
+            return $account;
+        }
+
+    }
+
+    public function findByEmail(string $email) {
+
+        $entityManager = $this->getEntityManager();
+
+        $query = $entityManager->createQuery(
+            "SELECT a
+            FROM App\Entity\Account a
+            WHERE a.email = :email"
+        )->setParameter("email", $email);
+
+        $result = $query->getResult();
+
+        if(count($result) == 1)
+            return $result[0];
+        else throw new RepositoryException("Compte associé à cette adresse email introuvable !");
+
+    }
+
 }
 
 ?>
