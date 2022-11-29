@@ -90,6 +90,44 @@ class AccountRepository extends ServiceEntityRepository {
 
     }
 
+    public function createAccount(Account $account) {
+
+        $entityManager = $this->getEntityManager();
+        $entityManager->persist($account);
+        $entityManager->flush();
+
+        return $this->findById($account->getId());
+
+    }
+
+    public function confirmAccount(Account $account) {
+
+        $acc = $this->findById($account->getId());
+        $acc->setStatus(1);
+        $this->getEntityManager()->flush();
+        
+        return $acc;
+
+    }
+
+    public function findById(int $id) {
+
+        $entityManager = $this->getEntityManager();
+
+        $query = $entityManager->createQuery(
+            "SELECT a
+            FROM App\Entity\Account a
+            WHERE a.id = :id"
+        )->setParameter("id", $id);
+
+        $result = $query->getResult();
+
+        if(count($result) == 1)
+            return $result[0];
+        else throw new RepositoryException("Compte associé à cet identifiant introuvable !");
+
+    }
+
 }
 
 ?>

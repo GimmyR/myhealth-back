@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Account;
 use App\Repository\AccountRepository;
 use App\Repository\RepositoryException;
 use Exception;
@@ -137,6 +138,94 @@ class AccountController extends AbstractController {
                 $model["status"] = -2;
                 $model["message"] = "Données passées invalides !";
             }
+
+        } return $this->json($model);
+
+    }
+
+    #[Route("/api/create-account", name: "account_create_account_api")]
+    public function createAccount(RequestStack $reqStack, 
+                                    AccountRepository $accountRep,
+                                        MailerInterface $mailer): JsonResponse {
+
+        $model = [ "status" => 0, "message" => null ];
+
+        try {
+
+            $reqData = json_decode($reqStack->getCurrentRequest()->getContent());
+            if($reqData == null || !isset($reqData->firstname) || !isset($reqData->lastname) ||
+                !isset($reqData->email) || !isset($reqData->password))
+                throw new ControllerException("Veuillez bien remplir les formulaires !");
+            
+            $account = new Account;
+            $account->setFirstname($reqData->firstname);
+            $account->setLastname($reqData->lastname);
+            $account->setEmail($reqData->email);
+            $account->setPassword($reqData->password);
+            $account->setStatus(0);
+            $account = $accountRep->createAccount($account);
+
+            $session = $reqStack->getSession();
+            $session->set("account", $account);
+            $confirm = bin2hex(random_bytes(5));
+            $session->set("confirm", $confirm);
+            
+            $email = (new Email())
+                        ->from("myhealth068@gmail.com")
+                        ->to($account->getEmail())
+                        ->subject("Confirmation de compte")
+                        ->text("Cliquer pour confirmer votre compte : ")
+                        ->html('<a href="http://localhost:4200/confirm-account/' .$confirm. '">Confirmer votre compte</a>');
+            $mailer->send($email);
+
+        } catch(RepositoryException $e) {
+
+            $model["status"] = -1;
+            $model["message"] = $e->getMessage();
+
+        } catch(Exception $e) {
+
+            $model["status"] = -2;
+            $model["message"] = $e->getMessage();
+
+        } return $this->json($model);
+
+    }
+
+    #[Route("/api/confirm-account/{confirm}")]
+    public function confirmAccount(string $confirm, 
+                                        RequestStack $reqStack,
+                                            AccountRepository $accountRep): JsonResponse {
+
+        $model = [ "status" => 0, "message" => null ];
+
+        try {
+
+            $session = $reqStack->getSession();
+            $account = $session->get("account");
+            if($account == null)
+                throw new ControllerException("Vous n'êtes pas authentifié !");
+
+            if($session->get("confirm") == $confirm) {
+                $account = $accountRep->confirmAccount($account);
+                $session->set("account", $account);
+                $session->remove("confirm");
+            } else throw new ControllerException("Code de confirmation erroné !");
+
+        } catch(ControllerException $e) {
+
+            $model["status"] = -1;
+            $model["message"] = $e->getMessage();
+
+        } catch(RepositoryException $e) {
+
+            $model["status"] = -2;
+            $model["message"] = $e->getMessage();
+
+        } catch(Exception $e) {
+
+            $model["status"] = -3;
+            $model["message"] = $e->getMessage();
 
         } return $this->json($model);
 
