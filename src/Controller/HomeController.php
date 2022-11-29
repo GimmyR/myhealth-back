@@ -5,10 +5,10 @@ namespace App\Controller;
 use App\Repository\AccountRepository;
 use App\Repository\OversightRepository;
 use App\Repository\RepositoryException;
+use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 class HomeController extends AbstractController {
@@ -68,6 +68,41 @@ class HomeController extends AbstractController {
         if($session->remove('account') == null) {
             $model["status"] = -1;
             $model["message"] = "Vous n'êtes pas authentifié !";
+        } return $this->json($model);
+
+    }
+
+    #[Route("/api/search", name: "home_search_api")]
+    public function search(RequestStack $reqStack, OversightRepository $oversightRep): JsonResponse {
+
+        $model = [ "status" => 0, "message" => null ];
+
+        try {
+
+            $session = $reqStack->getSession();
+            $account = $session->get("account");
+            if($account == null)
+                throw new ControllerException("Vous n'êtes pas authentifié !");
+
+            $reqData = json_decode($reqStack->getCurrentRequest()->getContent());
+            if($reqData == null || !isset($reqData->keywords))
+                throw new Exception("Veuillez bien remplir le formulaire !");
+            
+            $model["oversights"] = $oversightRep->findAllByAccountIdAndTitle(
+                $account->getId(), 
+                $reqData->keywords
+            );
+
+        } catch(ControllerException $e) {
+
+            $model["status"] = -1;
+            $model["message"] = $e->getMessage();
+
+        } catch(Exception $e) {
+
+            $model["status"] = -2;
+            $model["message"] = $e->getMessage();
+
         } return $this->json($model);
 
     }

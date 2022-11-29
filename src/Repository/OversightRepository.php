@@ -53,6 +53,26 @@ class OversightRepository extends ServiceEntityRepository {
 
     }
 
+    public function findAllByAccountIdAndTitle(int $accountId, string $keywords) {
+
+        $entityManager = $this->getEntityManager();
+
+        $query = $entityManager->createQuery(
+
+            'SELECT o
+            FROM App\Entity\Oversight o
+            WHERE o.accountId = :accountId
+            AND o.title LIKE :keywords'
+            
+        )->setParameters([
+
+            'accountId' => $accountId,
+            'keywords' => '%' .$keywords. '%'
+
+        ]); return $query->getResult();
+
+    }
+
     public function create(Oversight $oversight, array $parameters) {
 
         $entityManager = $this->getEntityManager();
