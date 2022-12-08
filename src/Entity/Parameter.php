@@ -56,7 +56,7 @@ class Parameter {
             $this->name = $name;
     }
 
-    public function getUnit(): string {
+    public function getUnit() {
         return $this->unit;
     }
 

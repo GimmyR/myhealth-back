@@ -1,1 +1,1 @@
-UPDATE Parameter SET status = 1 WHERE id = 8;
+DELETE FROM Account WHERE id = 3;

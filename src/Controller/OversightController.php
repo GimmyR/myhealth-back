@@ -265,16 +265,16 @@ class OversightController extends AbstractController {
 
         $model = [ "status" => 0, "message" => null ];
 
-        $session = $reqStack->getSession();
-        $account = $session->get('account');
+        try {
 
-        if($account == null) {
-            $model["status"] = -1;
-            $model["message"] = "Vous n'êtes pas authentifié !";
-        } else {
+            $session = $reqStack->getSession();
+            $account = $session->get('account');
 
-            try {
-            
+            if($account == null) {
+                $model["status"] = -1;
+                $model["message"] = "Vous n'êtes pas authentifié !";
+            } else {
+                
                 $content = $reqStack->getCurrentRequest()->getContent();
                 $reqData = json_decode($content);
                 if($content != null && $reqData != null && $reqData->id != null && $reqData->date != null && $reqData->title != null) {
@@ -304,18 +304,18 @@ class OversightController extends AbstractController {
 
                 }
 
-            } catch(ControllerException | RepositoryException | EntityException $e) {
+            } 
 
-                $model["status"] = -3;
-                $model["message"] = $e->getMessage();
+        } catch(ControllerException | RepositoryException | EntityException $e) {
 
-            } catch(Exception $e) {
+            $model["status"] = -3;
+            $model["message"] = $e->getMessage();
 
-                $model["status"] = -4;
-                $model["message"] = "Appelez un administrateur !";
-                $model["technical-issues"] = $e->getMessage();
+        } catch(Exception $e) {
 
-            }
+            $model["status"] = -4;
+            $model["message"] = "Appelez un administrateur !";
+            $model["technical-issues"] = $e->getMessage();
 
         } return $this->json($model);
 
