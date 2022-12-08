@@ -68,7 +68,8 @@ class OversightEntryController extends AbstractController {
                 $model['parameters'] = $parameterRep->findAllByOversightId($oversightId);
                 $requestData = json_decode($requestStack->getCurrentRequest()->getContent());
                 
-                if($requestData != null) {
+                if($requestData != null && isset($requestData->date) && isset($requestData->parameters)
+                    && $requestData->date != null && count($requestData->parameters) > 0) {
 
                     $entry = new OversightEntry;
                     $entry->setOversightId($oversightId);
@@ -87,9 +88,9 @@ class OversightEntryController extends AbstractController {
 
                     } $oversightEntryRep->add($entry, $details);
 
-                }
+                } else throw new ControllerException("Veuillez bien remplir les formulaires !");
 
-            } catch(RepositoryException $e) {
+            } catch(ControllerException | RepositoryException $e) {
 
                 $model['status'] = -1;
                 $model['message'] = $e->getMessage();
