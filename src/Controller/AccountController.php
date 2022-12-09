@@ -59,7 +59,7 @@ class AccountController extends AbstractController {
                 $account = $accountRep->findByEmail($reqData->email);
                 $code = bin2hex(random_bytes(5));
                 $email = (new Email())
-                            ->from("myhealth068@gmail.com")
+                            ->from("gimmyarazafimbelo2@gmail.com")
                             ->to($account->getEmail())
                             ->subject("Vérification de compte")
                             ->text("Code de vérification")
@@ -171,7 +171,7 @@ class AccountController extends AbstractController {
             $session->set("confirm", $confirm);
             
             $email = (new Email())
-                        ->from("myhealth068@gmail.com")
+                        ->from("gimmyarazafimbelo2@gmail.com")
                         ->to($account->getEmail())
                         ->subject("Confirmation de compte")
                         ->text("Cliquer pour confirmer votre compte : ")
