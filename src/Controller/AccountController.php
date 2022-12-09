@@ -62,8 +62,7 @@ class AccountController extends AbstractController {
                             ->from("gimmyarazafimbelo2@gmail.com")
                             ->to($account->getEmail())
                             ->subject("Vérification de compte")
-                            ->text("Code de vérification")
-                            ->html("<p><code>". $code ."</code></p>");
+                            ->html("Code de vérification : <p><code>". $code ."</code></p>");
                 $mailer->send($email);
                 $session = $reqStack->getSession();
                 $session->set("account", $account);
@@ -174,8 +173,10 @@ class AccountController extends AbstractController {
                         ->from("gimmyarazafimbelo2@gmail.com")
                         ->to($account->getEmail())
                         ->subject("Confirmation de compte")
-                        ->text("Cliquer pour confirmer votre compte : ")
-                        ->html('<a href="http://localhost:4200/confirm-account/' .$confirm. '">Confirmer votre compte</a>');
+                        ->html('
+                            Cliquer pour confirmer votre compte : 
+                            <a href="http://localhost:4200/confirm-account/' .$confirm. '">Confirmer votre compte</a>
+                        ');
             $mailer->send($email);
 
         } catch(RepositoryException $e) {
