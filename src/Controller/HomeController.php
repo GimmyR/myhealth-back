@@ -14,13 +14,6 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class HomeController extends AbstractController {
 
-    #[Route('/', name: 'home_index')]
-    public function index(): Response {
-
-        return $this->render("index.html");
-
-    }
-
     #[Route('/api/home-index', name: 'home_index_API')]
     public function index_API(RequestStack $requestStack, OversightRepository $oversightRep) : JsonResponse {
 
