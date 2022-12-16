@@ -24,9 +24,9 @@ Si vous avez un serveur SMTP à vous, commentez ma ligne de configuration avec s
 
 * Dans le fichier *services.yaml* du répertoire *config* :
 
-Normalement, vous n'avez pas à modifier le paramètre *app.front_url* si vous utilisez Apache (et ses configurations de base) comme serveur pour votre application front-end.
+Remplacez la valeur du paramètre *app.front_url* par l'URL de l'application front-end (le / vers la fin est important).
 
-Par contre, remplacez la valeur du paramètre *app.email_from* (soit *noreply@example.com*) par votre identifiant **Sendinblue** si vous utilisez ce dernier.
+Remplacez la valeur du paramètre *app.email_from* par votre identifiant **Sendinblue** si vous utilisez ce dernier.
 
 ## Lancement du serveur
 
