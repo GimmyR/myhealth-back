@@ -58,8 +58,9 @@ class AccountController extends AbstractController {
 
                 $account = $accountRep->findByEmail($reqData->email);
                 $code = bin2hex(random_bytes(5));
+                $emailFrom = $this->getParameter("app.email_from");
                 $email = (new Email())
-                            ->from("gimmyarazafimbelo2@gmail.com")
+                            ->from($emailFrom)
                             ->to($account->getEmail())
                             ->subject("Vérification de compte")
                             ->html("Code de vérification : <p><code>". $code ."</code></p>");
@@ -168,14 +169,16 @@ class AccountController extends AbstractController {
             $session->set("account", $account);
             $confirm = bin2hex(random_bytes(5));
             $session->set("confirm", $confirm);
+            $emailFrom = $this->getParameter("app.email_from");
+            $frontURL = $this->getParameter("app.front_url");
             
             $email = (new Email())
-                        ->from("gimmyarazafimbelo2@gmail.com")
+                        ->from($emailFrom)
                         ->to($account->getEmail())
                         ->subject("Confirmation de compte")
                         ->html('
                             Cliquer pour confirmer votre compte : 
-                            <a href="http://localhost:4200/confirm-account/' .$confirm. '">Confirmer votre compte</a>
+                            <a href="' .$frontURL. 'confirm-account/' .$confirm. '">Confirmer votre compte</a>
                         ');
             $mailer->send($email);
 
