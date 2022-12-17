@@ -11,7 +11,7 @@ MyHealth est une application web qui permet de surveiller l'état de santé d'un
 
 ## Configuration de la base de données
 
-Exécutez toutes les commandes du fichier *mysql-schema.sql* du répertoire *sql* dans votre SGBD.
+Exécutez toutes les commandes du fichier **mysql-schema.sql** du répertoire **sql** dans votre SGBD.
 
 ## Installation des dépendances
 
